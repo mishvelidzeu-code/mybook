@@ -479,46 +479,23 @@
   ];
 
   function getTempBooks() {
-    return clone(TEMP_BOOKS).map(applyBookPrice);
+    return [];
   }
 
   function getTempBook(id) {
-    const match = TEMP_BOOKS.find((book) => book.id === id);
-    return match ? applyBookPrice(clone(match)) : null;
+    return null;
   }
 
   function readTempSales() {
-    try {
-      const saved = JSON.parse(localStorage.getItem(TEMP_SALES_KEY) || "null");
-      if (Array.isArray(saved) && saved.length) {
-        return saved;
-      }
-    } catch (error) {
-      // fall through to defaults
-    }
-
-    localStorage.setItem(TEMP_SALES_KEY, JSON.stringify(TEMP_SALES_BASE));
-    return clone(TEMP_SALES_BASE);
+    return [];
   }
 
   function writeTempSales(sales) {
-    localStorage.setItem(TEMP_SALES_KEY, JSON.stringify(sales));
+    localStorage.removeItem(TEMP_SALES_KEY);
   }
 
   function createTempSale(payload, book) {
-    const sales = readTempSales();
-    const sale = {
-      id: `temp-s${Date.now()}`,
-      bookId: book.id,
-      book: book.title,
-      buyer: payload.buyerEmail || "guest@example.com",
-      amount: resolveBookPrice(payload.amount || book.price),
-      createdAt: new Date().toISOString()
-    };
-
-    sales.unshift(sale);
-    writeTempSales(sales);
-    return sale;
+    throw new Error("დროებითი კატალოგი გამორთულია. გამოიყენე მხოლოდ Supabase-ში დამატებული რეალური პროდუქტები.");
   }
 
   function getPublicCoverUrl(path) {
@@ -799,18 +776,13 @@
       }
 
       const books = (data || []).map(mapBookRow);
-      return books.length ? books : getTempBooks();
+      return books;
     } catch (error) {
-      return getTempBooks();
+      return [];
     }
   }
 
   async function getBook(id) {
-    const tempBook = getTempBook(id);
-    if (tempBook) {
-      return tempBook;
-    }
-
     const supabase = getClient();
 
     try {
@@ -992,15 +964,15 @@
       if (salesResult.error) throw salesResult.error;
 
       return {
-        books: booksResult.count || getTempBooks().length,
+        books: booksResult.count || 0,
         users: usersResult.count || 1,
-        sales: salesResult.count || readTempSales().length
+        sales: salesResult.count || 0
       };
     } catch (error) {
       return {
-        books: getTempBooks().length,
+        books: 0,
         users: 1,
-        sales: readTempSales().length
+        sales: 0
       };
     }
   }
@@ -1050,9 +1022,9 @@
       }
 
       const sales = (data || []).map(mapSaleRow);
-      return sales.length ? sales : readTempSales();
+      return sales;
     } catch (error) {
-      return readTempSales();
+      return [];
     }
   }
 
