@@ -270,6 +270,11 @@ textarea {
   border: 1px solid var(--line);
   color: var(--title);
   font-weight: 700;
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease,
+    background-color 220ms ease;
 }
 
 .section-link span {
@@ -334,6 +339,11 @@ textarea {
 .author-card,
 .book-card {
   border-radius: 22px;
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease,
+    background-color 220ms ease;
 }
 
 .feature-pill,
@@ -462,6 +472,10 @@ textarea {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
     0 18px 26px rgba(34, 105, 196, 0.12);
+  transition:
+    transform 260ms ease,
+    box-shadow 220ms ease,
+    filter 220ms ease;
 }
 
 .book-cover::before,
@@ -481,6 +495,7 @@ textarea {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 320ms ease, filter 220ms ease;
 }
 
 .cover-overlay {
@@ -686,6 +701,12 @@ textarea {
   color: #8f3f3f;
 }
 
+.form-message.info {
+  background: rgba(34, 105, 196, 0.08);
+  border: 1px solid rgba(34, 105, 196, 0.18);
+  color: var(--primary-deep);
+}
+
 .upload-field {
   display: grid;
   gap: 8px;
@@ -881,4 +902,88 @@ textarea {
 
 .book-card .book-meta h3 {
   font-size: 1rem;
+}
+
+.success-card {
+  display: grid;
+  gap: 16px;
+}
+
+.success-header {
+  display: grid;
+  gap: 10px;
+}
+
+.success-header h2 {
+  margin: 0;
+}
+
+.status-chip {
+  display: inline-flex;
+  width: fit-content;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(31, 145, 92, 0.12);
+  color: #156b49;
+  border: 1px solid rgba(31, 145, 92, 0.2);
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.success-note {
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(100, 145, 198, 0.16);
+  display: grid;
+  gap: 8px;
+}
+
+.success-note strong,
+.success-note p {
+  margin: 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .section-link:hover,
+  .feature-pill:hover,
+  .detail-card:hover,
+  .checkout-summary:hover,
+  .author-card:hover,
+  .empty-state:hover,
+  .loading-state:hover,
+  .success-note:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 22px 42px rgba(76, 120, 178, 0.16);
+    border-color: var(--line-strong);
+  }
+
+  .book-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 28px 52px rgba(76, 120, 178, 0.18);
+    border-color: var(--line-strong);
+  }
+
+  .book-card:hover .book-cover,
+  .book-focus:hover .book-cover-large {
+    transform: translateY(-2px) scale(1.015);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.4),
+      0 24px 34px rgba(34, 105, 196, 0.16);
+    filter: saturate(1.04);
+  }
+
+  .book-card:hover .cover-image,
+  .book-focus:hover .cover-image {
+    transform: scale(1.03);
+    filter: saturate(1.04);
+  }
+
+  .section-link:hover span {
+    transform: translateX(2px);
+  }
+
+  .section-link span {
+    transition: transform 220ms ease;
+  }
 }

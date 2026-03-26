@@ -7,5 +7,6 @@ window.APP_CONFIG = {
   SUPABASE_ANON_KEY: "sb_publishable_9GIjGhl2IhRksJAQcgOehw_M21L8_i0",
   SUPABASE_BOOKS_BUCKET: "books",
   SUPABASE_COVERS_BUCKET: "covers",
+  PASSWORD_RESET_REDIRECT_URL: "",
   DEMO_MODE: false
 };

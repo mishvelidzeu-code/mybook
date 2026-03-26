@@ -11,6 +11,10 @@
 .admin-panel {
   padding: 18px;
   border-radius: 30px;
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease;
 }
 
 .sidebar-brand {
@@ -71,6 +75,11 @@
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.82);
   border: 1px solid var(--line);
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease,
+    background-color 220ms ease;
 }
 
 .admin-stat {
@@ -191,5 +200,17 @@
 @media (max-width: 560px) {
   .admin-top {
     display: grid;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .admin-sidebar:hover,
+  .admin-top:hover,
+  .admin-panel:hover,
+  .admin-stat:hover,
+  .admin-row:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 24px 46px rgba(76, 120, 178, 0.16);
+    border-color: var(--line-strong);
   }
 }

@@ -6,6 +6,10 @@
     return window.APP_CONFIG || {};
   }
 
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
   function isConfigured() {
     const config = getConfig();
     return Boolean(window.supabase && config.SUPABASE_URL && config.SUPABASE_ANON_KEY);
@@ -75,6 +79,24 @@
   function clearCachedSession() {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
+  }
+
+  function hasRecoveryParams() {
+    const locationState = `${window.location.search || ""}${window.location.hash || ""}`;
+    return /type=recovery|access_token=|refresh_token=|token_hash=|code=/.test(locationState);
+  }
+
+  function buildResetRedirectUrl() {
+    const configuredUrl = String(getConfig().PASSWORD_RESET_REDIRECT_URL || "").trim();
+    if (configuredUrl) {
+      return configuredUrl;
+    }
+
+    try {
+      return new URL("reset-password.html", window.location.href).toString();
+    } catch (error) {
+      return "reset-password.html";
+    }
   }
 
   function normalizeProfileRow(row, fallbackUser) {
@@ -645,6 +667,87 @@
     }
   }
 
+  async function requestPasswordReset(payload) {
+    const supabase = getClient();
+    const email = String(payload?.email || "").trim();
+
+    if (!email) {
+      throw new Error("გთხოვ შეიყვანო ელფოსტა");
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: buildResetRedirectUrl()
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    return {
+      success: true,
+      message: "თუ ეს ელფოსტა არსებობს, პაროლის აღდგენის ბმული გამოგზავნილია."
+    };
+  }
+
+  async function waitForPasswordSession(timeoutMs = 2800) {
+    const supabase = getClient();
+    const startedAt = Date.now();
+
+    while (Date.now() - startedAt < timeoutMs) {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        throw error;
+      }
+
+      if (data.session) {
+        return data.session;
+      }
+
+      if (!hasRecoveryParams()) {
+        break;
+      }
+
+      await sleep(160);
+    }
+
+    return null;
+  }
+
+  async function updatePassword(payload) {
+    const supabase = getClient();
+    const nextPassword = String(payload?.password || "");
+
+    if (!nextPassword) {
+      throw new Error("გთხოვ შეიყვანო ახალი პაროლი");
+    }
+
+    const session = await waitForPasswordSession();
+    if (!session) {
+      throw new Error("ახალი პაროლის დასაყენებლად ამ გვერდზე ელფოსტიდან მიღებული ბმულით უნდა შემოხვიდე");
+    }
+
+    const { data, error } = await supabase.auth.updateUser({
+      password: nextPassword
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    cacheToken(await getCurrentSession());
+
+    try {
+      await syncSessionUser();
+    } catch (profileError) {
+      cacheUser(normalizeProfileRow(null, data.user));
+    }
+
+    return {
+      success: true,
+      message: "პაროლი წარმატებით განახლდა"
+    };
+  }
+
   async function getBooks() {
     const supabase = getClient();
 
@@ -996,6 +1099,8 @@
     clearCachedSession,
     signIn,
     signUp,
+    requestPasswordReset,
+    updatePassword,
     getBooks,
     getBook,
     getMyBooks,

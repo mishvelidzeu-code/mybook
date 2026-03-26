@@ -1,4 +1,6 @@
 (function () {
+  const LAST_PURCHASE_KEY = "lurji-taro-last-purchase";
+
   function query(name) {
     return new URLSearchParams(window.location.search).get(name);
   }
@@ -26,6 +28,10 @@
     }
 
     return book;
+  }
+
+  function savePurchaseSummary(payload) {
+    sessionStorage.setItem(LAST_PURCHASE_KEY, JSON.stringify(payload));
   }
 
   let currentBook = null;
@@ -59,17 +65,41 @@
     submitButton.disabled = true;
 
     try {
+      const buyerName = document.getElementById("buyerName").value.trim();
+      const buyerEmail = document.getElementById("buyerEmail").value.trim();
+      const buyerPhone = document.getElementById("buyerPhone").value.trim();
+      const paymentMethod = document.getElementById("paymentMethod").value;
+
       const result = await Api.createPaymentIntent({
         bookId: currentBook.id,
         amount: currentBook.price,
-        buyerName: document.getElementById("buyerName").value.trim(),
-        buyerEmail: document.getElementById("buyerEmail").value.trim(),
-        buyerPhone: document.getElementById("buyerPhone").value.trim(),
-        paymentMethod: document.getElementById("paymentMethod").value
+        buyerName,
+        buyerEmail,
+        buyerPhone,
+        paymentMethod
+      });
+
+      savePurchaseSummary({
+        saleId: result.saleId || "",
+        status: result.status || "recorded",
+        deliveryMode: result.deliveryMode || "manual",
+        isDemo: Boolean(result.isDemo),
+        bookId: currentBook.id,
+        bookTitle: currentBook.title,
+        amount: currentBook.price,
+        buyerName,
+        buyerEmail,
+        buyerPhone,
+        paymentMethod,
+        message: result.message || "შეძენა წარმატებით დაფიქსირდა",
+        createdAt: new Date().toISOString()
       });
 
       showPaymentMessage(result.message || "შეძენა წარმატებით დასრულდა", "success");
-      paymentForm.reset();
+
+      setTimeout(() => {
+        window.location.href = "success.html";
+      }, 500);
     } catch (error) {
       showPaymentMessage(error.message || "შეძენა ვერ შესრულდა", "error");
     } finally {

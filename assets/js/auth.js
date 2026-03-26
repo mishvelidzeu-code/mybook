@@ -5,18 +5,28 @@
     element.className = `form-message show ${type}`;
   }
 
+  function setPendingState(form, isPending) {
+    const submitButton = form?.querySelector('button[type="submit"]');
+    if (!submitButton) return null;
+    submitButton.disabled = isPending;
+    return submitButton;
+  }
+
+  function readValue(id) {
+    return document.getElementById(id)?.value?.trim() || "";
+  }
+
   const loginForm = document.getElementById("loginForm");
   if (loginForm) {
     loginForm.addEventListener("submit", async (event) => {
       event.preventDefault();
 
       const messageBox = document.getElementById("loginMessage");
-      const submitButton = loginForm.querySelector('button[type="submit"]');
-      submitButton.disabled = true;
+      setPendingState(loginForm, true);
 
       try {
         const payload = {
-          email: document.getElementById("loginEmail").value.trim(),
+          email: readValue("loginEmail"),
           password: document.getElementById("loginPassword").value
         };
 
@@ -36,7 +46,7 @@
       } catch (error) {
         showMessage(messageBox, error.message || "შესვლა ვერ შესრულდა", "error");
       } finally {
-        submitButton.disabled = false;
+        setPendingState(loginForm, false);
       }
     });
   }
@@ -47,14 +57,21 @@
       event.preventDefault();
 
       const messageBox = document.getElementById("registerMessage");
-      const submitButton = registerForm.querySelector('button[type="submit"]');
-      submitButton.disabled = true;
+      const password = document.getElementById("registerPassword").value;
+      const passwordConfirm = document.getElementById("registerPasswordConfirm").value;
+
+      if (password !== passwordConfirm) {
+        showMessage(messageBox, "პაროლები ერთმანეთს არ ემთხვევა", "error");
+        return;
+      }
+
+      setPendingState(registerForm, true);
 
       try {
         const payload = {
-          name: document.getElementById("registerName").value.trim(),
-          email: document.getElementById("registerEmail").value.trim(),
-          password: document.getElementById("registerPassword").value,
+          name: readValue("registerName"),
+          email: readValue("registerEmail"),
+          password,
           role: document.getElementById("registerRole").value
         };
 
@@ -82,7 +99,80 @@
       } catch (error) {
         showMessage(messageBox, error.message || "რეგისტრაცია ვერ შესრულდა", "error");
       } finally {
-        submitButton.disabled = false;
+        setPendingState(registerForm, false);
+      }
+    });
+  }
+
+  const forgotPasswordForm = document.getElementById("forgotPasswordForm");
+  if (forgotPasswordForm) {
+    forgotPasswordForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const messageBox = document.getElementById("forgotPasswordMessage");
+      setPendingState(forgotPasswordForm, true);
+
+      try {
+        const result = await Api.requestPasswordReset({
+          email: readValue("forgotPasswordEmail")
+        });
+
+        showMessage(
+          messageBox,
+          result.message || "თუ ეს ელფოსტა არსებობს, პაროლის აღდგენის ბმული გამოგზავნილია.",
+          "success"
+        );
+        forgotPasswordForm.reset();
+      } catch (error) {
+        showMessage(messageBox, error.message || "აღდგენის წერილი ვერ გაიგზავნა", "error");
+      } finally {
+        setPendingState(forgotPasswordForm, false);
+      }
+    });
+  }
+
+  const resetPasswordForm = document.getElementById("resetPasswordForm");
+  if (resetPasswordForm) {
+    const messageBox = document.getElementById("resetPasswordMessage");
+    const locationState = `${window.location.search || ""}${window.location.hash || ""}`;
+    const looksLikeRecoveryFlow = /type=recovery|access_token=|refresh_token=|token_hash=|code=/.test(locationState);
+
+    if (!looksLikeRecoveryFlow) {
+      showMessage(
+        messageBox,
+        "თუ პაროლი დაგავიწყდა, ჯერ ელფოსტაზე გამოითხოვე აღდგენის ბმული და მერე ამ გვერდზე დაბრუნდი.",
+        "info"
+      );
+    }
+
+    resetPasswordForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const nextPassword = document.getElementById("resetPassword").value;
+      const nextPasswordConfirm = document.getElementById("resetPasswordConfirm").value;
+
+      if (nextPassword !== nextPasswordConfirm) {
+        showMessage(messageBox, "პაროლები ერთმანეთს არ ემთხვევა", "error");
+        return;
+      }
+
+      setPendingState(resetPasswordForm, true);
+
+      try {
+        const result = await Api.updatePassword({
+          password: nextPassword
+        });
+
+        showMessage(messageBox, result.message || "პაროლი წარმატებით განახლდა", "success");
+        resetPasswordForm.reset();
+
+        setTimeout(() => {
+          window.location.href = "login.html";
+        }, 1000);
+      } catch (error) {
+        showMessage(messageBox, error.message || "პაროლის განახლება ვერ შესრულდა", "error");
+      } finally {
+        setPendingState(resetPasswordForm, false);
       }
     });
   }

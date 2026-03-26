@@ -1,5 +1,6 @@
 (function () {
   const DEMO_STORE_KEY = "lurji-taro-demo-store";
+  const DEMO_RESET_EMAIL_KEY = "lurji-taro-demo-reset-email";
   const DEMO_STORE_VERSION = 3;
 
   const defaultDemoStore = {
@@ -417,6 +418,55 @@
         };
       }
 
+      if (path === "/auth/forgot-password" && method === "POST") {
+        const payload = parseJsonBody(options.body);
+        const email = String(payload.email || "").trim().toLowerCase();
+
+        if (!email) {
+          throw new Error("გთხოვ შეიყვანო ელფოსტა");
+        }
+
+        localStorage.setItem(DEMO_RESET_EMAIL_KEY, email);
+
+        return {
+          success: true,
+          message: "თუ ეს ელფოსტა არსებობს, პაროლის აღდგენის ბმული გამოგზავნილია."
+        };
+      }
+
+      if (path === "/auth/reset-password" && method === "POST") {
+        const payload = parseJsonBody(options.body);
+        const nextPassword = String(payload.password || "");
+        const email = String(
+          payload.email
+          || localStorage.getItem(DEMO_RESET_EMAIL_KEY)
+          || getCurrentUser()?.email
+          || ""
+        ).trim().toLowerCase();
+
+        if (!nextPassword) {
+          throw new Error("გთხოვ შეიყვანო ახალი პაროლი");
+        }
+
+        if (!email) {
+          throw new Error("აღდგენის სესია ვერ მოიძებნა, თავიდან გააგზავნე აღდგენის წერილი");
+        }
+
+        const user = store.users.find((entry) => entry.email.toLowerCase() === email);
+        if (!user) {
+          throw new Error("აღდგენის სესია ვერ მოიძებნა, თავიდან გააგზავნე აღდგენის წერილი");
+        }
+
+        user.password = nextPassword;
+        saveDemoStore(store);
+        localStorage.removeItem(DEMO_RESET_EMAIL_KEY);
+
+        return {
+          success: true,
+          message: "პაროლი წარმატებით განახლდა"
+        };
+      }
+
       if (path === "/books" && method === "GET") {
         return clone(store.books).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       }
@@ -577,6 +627,8 @@
       const liveOnlyMethods = new Set([
         "signIn",
         "signUp",
+        "requestPasswordReset",
+        "updatePassword",
         "getMyBooks",
         "uploadBook",
         "updateBook",
@@ -665,6 +717,32 @@
       }
 
       return this.request("/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    },
+
+    requestPasswordReset(payload) {
+      const supabaseMethod = this.getSupabaseMethod("requestPasswordReset");
+      if (supabaseMethod) {
+        return supabaseMethod(payload);
+      }
+
+      return this.request("/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    },
+
+    updatePassword(payload) {
+      const supabaseMethod = this.getSupabaseMethod("updatePassword");
+      if (supabaseMethod) {
+        return supabaseMethod(payload);
+      }
+
+      return this.request("/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
