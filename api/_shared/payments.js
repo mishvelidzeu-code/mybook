@@ -34,6 +34,10 @@ function createOrderId(prefix = "BOOK") {
   return `${prefix}-${Date.now()}-${randomPart}`;
 }
 
+function isUuid(value) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || "").trim());
+}
+
 function normalizeSiteUrl(value) {
   return String(value || "").trim().replace(/\/+$/, "");
 }
@@ -174,6 +178,7 @@ module.exports = {
   escapeHtml,
   parseBody,
   createOrderId,
+  isUuid,
   normalizeSiteUrl,
   getSiteUrl,
   createSupabaseAdminClient,

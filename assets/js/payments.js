@@ -18,6 +18,19 @@
     box.className = `form-message show ${type}`;
   }
 
+  function isLiveBogCheckoutBlocked(book) {
+    return Boolean(
+      book
+      && String(book.id || "").startsWith("temp-")
+      && !window.APP_CONFIG?.DEMO_MODE
+      && window.APP_CONFIG?.PAYMENT_PROVIDER === "bog"
+    );
+  }
+
+  function getTempBookWarning() {
+    return "ეს წიგნი ახლა მხოლოდ დროებითი საჩვენებელი კატალოგიდან მოდის. BOG ტესტისთვის წიგნი ჯერ Supabase books ცხრილში უნდა ჩაისვას.";
+  }
+
   async function preloadBook() {
     const id = query("id") || "b1";
     const book = await Api.getBook(id);
@@ -46,6 +59,12 @@
       if (!book) {
         showPaymentMessage("წიგნი ვერ მოიძებნა, გთხოვ აირჩიე სხვა გამოცემა.", "error");
         paymentForm.querySelector('button[type="submit"]').disabled = true;
+        return;
+      }
+
+      if (isLiveBogCheckoutBlocked(book)) {
+        showPaymentMessage(getTempBookWarning(), "error");
+        paymentForm.querySelector('button[type="submit"]').disabled = true;
       }
     })
     .catch((error) => {
@@ -58,6 +77,11 @@
 
     if (!currentBook) {
       showPaymentMessage("არჩეული წიგნი ვერ მოიძებნა", "error");
+      return;
+    }
+
+    if (isLiveBogCheckoutBlocked(currentBook)) {
+      showPaymentMessage(getTempBookWarning(), "error");
       return;
     }
 

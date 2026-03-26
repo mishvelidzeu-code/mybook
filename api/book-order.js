@@ -1,6 +1,7 @@
 const {
   parseBody,
   createOrderId,
+  isUuid,
   getSiteUrl,
   createSupabaseAdminClient,
   getBogAccessToken
@@ -25,6 +26,12 @@ module.exports = async function handler(req, res) {
 
     if (!bookId || !buyerName || !buyerEmail || !buyerPhone) {
       return res.status(400).json({ error: "Missing checkout fields" });
+    }
+
+    if (!isUuid(bookId)) {
+      return res.status(400).json({
+        error: "ეს წიგნი ჯერ Supabase books ცხრილში არ არის. BOG ტესტისთვის გამოიყენე ბაზაში დამატებული რეალური წიგნი."
+      });
     }
 
     const supabase = createSupabaseAdminClient();
