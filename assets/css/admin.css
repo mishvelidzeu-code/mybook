@@ -1,0 +1,146 @@
+.admin-shell {
+  width: min(100%, 1200px);
+  margin: 0 auto;
+  padding: 16px 16px 44px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.admin-sidebar,
+.admin-top,
+.admin-panel {
+  padding: 18px;
+  border-radius: 30px;
+}
+
+.sidebar-brand {
+  margin-bottom: 20px;
+}
+
+.admin-nav {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-nav-link {
+  min-height: 50px;
+  padding: 14px;
+  border-radius: 16px;
+  text-align: left;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease;
+  cursor: pointer;
+}
+
+.admin-nav-link.active {
+  color: var(--gold-soft);
+  background: rgba(205, 168, 106, 0.1);
+  border-color: rgba(205, 168, 106, 0.2);
+}
+
+.admin-main {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-top p {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.admin-stat,
+.admin-row {
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-stat {
+  padding: 16px;
+}
+
+.admin-stat strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: clamp(2rem, 8vw, 2.6rem);
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-weight: 600;
+}
+
+.admin-stat span,
+.admin-row small {
+  color: var(--muted);
+}
+
+.admin-list {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-row {
+  display: grid;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.admin-row strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.admin-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media (min-width: 700px) {
+  .admin-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .admin-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+}
+
+@media (min-width: 980px) {
+  .admin-shell {
+    grid-template-columns: 290px minmax(0, 1fr);
+    padding-inline: 22px;
+  }
+
+  .admin-sidebar {
+    position: sticky;
+    top: 16px;
+    align-self: start;
+  }
+}
+
+@media (max-width: 520px) {
+  .admin-top {
+    display: grid;
+  }
+}

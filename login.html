@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#06070a" />
+  <title>Login — NoirLeaf</title>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="stylesheet" href="assets/css/auth.css" />
+</head>
+<body>
+  <main class="auth-page">
+    <section class="auth-card glass">
+      <a class="auth-back" href="index.html">← მთავარი</a>
+
+      <div class="auth-brand">
+        <div class="brand-mark">N</div>
+        <div>
+          <h1>Welcome Back</h1>
+          <p>შედი შენს ანგარიშში</p>
+        </div>
+      </div>
+
+      <form id="loginForm" class="auth-form">
+        <input id="loginEmail" class="input" type="email" placeholder="Email" autocomplete="email" required />
+        <input
+          id="loginPassword"
+          class="input"
+          type="password"
+          placeholder="Password"
+          autocomplete="current-password"
+          required
+        />
+        <button class="primary-btn full" type="submit">Login</button>
+      </form>
+
+      <div id="loginMessage" class="form-message" aria-live="polite"></div>
+      <p class="auth-switch">არ გაქვს ანგარიში? <a href="register.html">რეგისტრაცია</a></p>
+    </section>
+  </main>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/auth.js"></script>
+</body>
+</html>

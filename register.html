@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#06070a" />
+  <title>Register — NoirLeaf</title>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="stylesheet" href="assets/css/auth.css" />
+</head>
+<body>
+  <main class="auth-page">
+    <section class="auth-card glass">
+      <a class="auth-back" href="index.html">← მთავარი</a>
+
+      <div class="auth-brand">
+        <div class="brand-mark">N</div>
+        <div>
+          <h1>Create Account</h1>
+          <p>შექმენი ავტორის ან მომხმარებლის ანგარიში</p>
+        </div>
+      </div>
+
+      <form id="registerForm" class="auth-form">
+        <input id="registerName" class="input" type="text" placeholder="Full name" autocomplete="name" required />
+        <input id="registerEmail" class="input" type="email" placeholder="Email" autocomplete="email" required />
+        <input
+          id="registerPassword"
+          class="input"
+          type="password"
+          placeholder="Password"
+          autocomplete="new-password"
+          required
+        />
+        <select id="registerRole" class="input">
+          <option value="reader">Reader</option>
+          <option value="author">Author</option>
+        </select>
+        <button class="primary-btn full" type="submit">Register</button>
+      </form>
+
+      <div id="registerMessage" class="form-message" aria-live="polite"></div>
+      <p class="auth-switch">უკვე გაქვს ანგარიში? <a href="login.html">Login</a></p>
+    </section>
+  </main>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/auth.js"></script>
+</body>
+</html>

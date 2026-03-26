@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#06070a" />
+  <title>Admin Panel — NoirLeaf</title>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="stylesheet" href="assets/css/admin.css" />
+</head>
+<body>
+  <div class="admin-shell">
+    <aside class="admin-sidebar glass">
+      <div class="brand-wrap sidebar-brand">
+        <div class="brand-mark">N</div>
+        <div>
+          <h1>NoirLeaf</h1>
+          <p>Admin Panel</p>
+        </div>
+      </div>
+
+      <nav class="admin-nav" aria-label="Admin tabs">
+        <button class="admin-nav-link active" data-admin-tab="dashboard">Dashboard</button>
+        <button class="admin-nav-link" data-admin-tab="books">Books</button>
+        <button class="admin-nav-link" data-admin-tab="users">Users</button>
+        <button class="admin-nav-link" data-admin-tab="sales">Sales</button>
+      </nav>
+    </aside>
+
+    <main class="admin-main">
+      <section class="admin-top glass">
+        <div>
+          <h2>Luxury Control Center</h2>
+          <p>წიგნების, მომხმარებლების და გაყიდვების მართვა</p>
+        </div>
+        <a class="ghost-btn" href="library.html">Back to Library</a>
+      </section>
+
+      <section id="admin-dashboard" class="admin-panel glass">
+        <div class="admin-stats">
+          <article class="admin-stat">
+            <strong id="adminBookCount">0</strong>
+            <span>Books</span>
+          </article>
+          <article class="admin-stat">
+            <strong id="adminUserCount">0</strong>
+            <span>Users</span>
+          </article>
+          <article class="admin-stat">
+            <strong id="adminSalesCount">0</strong>
+            <span>Sales</span>
+          </article>
+        </div>
+      </section>
+
+      <section id="admin-books" class="admin-panel glass hidden">
+        <div class="section-head">
+          <h3>Books</h3>
+          <span>CRUD management</span>
+        </div>
+        <div id="adminBooksList" class="admin-list"></div>
+      </section>
+
+      <section id="admin-users" class="admin-panel glass hidden">
+        <div class="section-head">
+          <h3>Users</h3>
+          <span>roles and profiles</span>
+        </div>
+        <div id="adminUsersList" class="admin-list"></div>
+      </section>
+
+      <section id="admin-sales" class="admin-panel glass hidden">
+        <div class="section-head">
+          <h3>Sales</h3>
+          <span>transactions overview</span>
+        </div>
+        <div id="adminSalesList" class="admin-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/admin.js"></script>
+</body>
+</html>

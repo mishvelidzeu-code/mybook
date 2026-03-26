@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#06070a" />
+  <title>Upload — NoirLeaf</title>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar glass compact">
+      <div class="brand-wrap">
+        <div class="brand-mark">N</div>
+        <div>
+          <h1>Upload Book</h1>
+          <p>Real upload logic ready</p>
+        </div>
+      </div>
+
+      <a class="ghost-btn" href="library.html">Library</a>
+    </header>
+
+    <main class="content-stack">
+      <section class="glass panel">
+        <div class="section-head">
+          <h2>ახალი წიგნის ატვირთვა</h2>
+          <span>metadata + file upload + backend handoff</span>
+        </div>
+
+        <form id="uploadForm" class="stack-form">
+          <input id="bookTitle" class="input" type="text" placeholder="წიგნის სათაური" required />
+          <input id="bookAuthor" class="input" type="text" placeholder="ავტორი" required />
+          <select id="bookGenre" class="input" required>
+            <option value="">აირჩიე ჟანრი</option>
+            <option value="ბიზნესი">ბიზნესი</option>
+            <option value="მოტივაცია">მოტივაცია</option>
+            <option value="ფსიქოლოგია">ფსიქოლოგია</option>
+            <option value="რომანი">რომანი</option>
+          </select>
+          <input id="bookPrice" class="input" type="number" min="0" step="0.01" placeholder="ფასი" required />
+          <textarea id="bookDescription" class="input textarea" placeholder="აღწერა" required></textarea>
+
+          <label class="upload-field">
+            <span>ატვირთე ebook ფაილი</span>
+            <input id="ebookFile" type="file" accept=".pdf,.epub,.mobi" required />
+          </label>
+
+          <label class="upload-field">
+            <span>ატვირთე ყდა</span>
+            <input id="coverFile" type="file" accept="image/*" required />
+          </label>
+
+          <button class="primary-btn full" type="submit">ატვირთვა</button>
+        </form>
+
+        <div id="uploadMessage" class="form-message" aria-live="polite"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/upload.js"></script>
+</body>
+</html>

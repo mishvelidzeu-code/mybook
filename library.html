@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#06070a" />
+  <title>Library — NoirLeaf</title>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar glass compact">
+      <div class="brand-wrap">
+        <div class="brand-mark">N</div>
+        <div>
+          <h1>Library</h1>
+          <p>Premium digital shelf</p>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <a class="ghost-btn" href="upload.html">Upload</a>
+        <a class="ghost-btn" href="admin.html">Admin</a>
+      </div>
+    </header>
+
+    <main class="content-stack">
+      <section class="glass panel">
+        <div class="section-head">
+          <h2>ელწიგნები</h2>
+          <span>ძებნა, კატეგორიები და პრემიუმ ჩვენება</span>
+        </div>
+
+        <div class="toolbar-grid">
+          <input id="searchBooks" class="input" type="search" placeholder="მოძებნე წიგნი..." />
+          <select id="filterGenre" class="input">
+            <option value="all">ყველა ჟანრი</option>
+            <option value="ბიზნესი">ბიზნესი</option>
+            <option value="მოტივაცია">მოტივაცია</option>
+            <option value="ფსიქოლოგია">ფსიქოლოგია</option>
+            <option value="რომანი">რომანი</option>
+          </select>
+        </div>
+      </section>
+
+      <section id="booksGrid" class="book-grid" aria-live="polite"></section>
+    </main>
+  </div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
