@@ -574,13 +574,31 @@
   const Api = {
     getSupabaseMethod(name) {
       const service = window.SupabaseService;
+      const liveOnlyMethods = new Set([
+        "signIn",
+        "signUp",
+        "getMyBooks",
+        "uploadBook",
+        "updateBook",
+        "getAdminStats",
+        "getUsers",
+        "getSales"
+      ]);
 
-      if (!service || typeof service.isEnabled !== "function" || !service.isEnabled()) {
+      if (!service) {
         return null;
       }
 
       const method = service[name];
-      return typeof method === "function" ? method.bind(service) : null;
+      if (typeof method !== "function") {
+        return null;
+      }
+
+      if (liveOnlyMethods.has(name) && (typeof service.isEnabled !== "function" || !service.isEnabled())) {
+        return null;
+      }
+
+      return method.bind(service);
     },
 
     async request(path, options = {}) {
