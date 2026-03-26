@@ -1,5 +1,6 @@
 (function () {
   let client = null;
+  const TEMP_SALES_KEY = "lurji-taro-temp-sales";
 
   function getConfig() {
     return window.APP_CONFIG || {};
@@ -31,6 +32,10 @@
     }
 
     return client;
+  }
+
+  function clone(value) {
+    return JSON.parse(JSON.stringify(value));
   }
 
   function slugify(value) {
@@ -80,6 +85,383 @@
       role: row?.role || fallbackUser?.user_metadata?.role || "author",
       createdAt: row?.created_at || fallbackUser?.created_at || new Date().toISOString()
     };
+  }
+
+  function escapeXml(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&apos;");
+  }
+
+  function wrapTitleLines(title, maxLength) {
+    const words = String(title || "").split(/\s+/).filter(Boolean);
+    const lines = [];
+    let current = "";
+
+    words.forEach((word) => {
+      const candidate = current ? `${current} ${word}` : word;
+      if (candidate.length <= maxLength) {
+        current = candidate;
+      } else {
+        if (current) {
+          lines.push(current);
+        }
+        current = word;
+      }
+    });
+
+    if (current) {
+      lines.push(current);
+    }
+
+    return lines.slice(0, 3);
+  }
+
+  function createTempCoverUrl(options) {
+    const lines = wrapTitleLines(options.title, 15);
+    const lineMarkup = lines
+      .map((line, index) => {
+        const y = 360 + (index * 66);
+        return `<text x="90" y="${y}" fill="#ffffff" font-family="Georgia, serif" font-size="56" font-weight="700">${escapeXml(line)}</text>`;
+      })
+      .join("");
+
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1500" viewBox="0 0 1000 1500">
+        <defs>
+          <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="${options.colors[0]}"/>
+            <stop offset="55%" stop-color="${options.colors[1]}"/>
+            <stop offset="100%" stop-color="${options.colors[2]}"/>
+          </linearGradient>
+          <linearGradient id="shine" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="rgba(255,255,255,0.55)"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+          </linearGradient>
+        </defs>
+        <rect width="1000" height="1500" rx="48" fill="url(#bg)"/>
+        <circle cx="820" cy="220" r="170" fill="rgba(255,255,255,0.12)"/>
+        <path d="M 0 1160 C 180 1050, 350 1100, 540 1010 C 710 930, 830 760, 1000 700 L 1000 1500 L 0 1500 Z" fill="rgba(255,255,255,0.10)"/>
+        <rect x="64" y="64" width="872" height="1372" rx="36" fill="none" stroke="rgba(255,255,255,0.24)" stroke-width="2"/>
+        <text x="90" y="120" fill="rgba(255,255,255,0.92)" font-family="Arial, sans-serif" font-size="34" font-weight="700">${escapeXml(options.typeLabel)}</text>
+        <text x="90" y="190" fill="rgba(255,255,255,0.78)" font-family="Arial, sans-serif" font-size="28">${escapeXml(options.genre)}</text>
+        ${lineMarkup}
+        <text x="90" y="1315" fill="rgba(255,255,255,0.92)" font-family="Arial, sans-serif" font-size="36" font-weight="700">${escapeXml(options.author)}</text>
+        <text x="90" y="1375" fill="rgba(255,255,255,0.78)" font-family="Arial, sans-serif" font-size="24">1000 × 1500 დროებითი ყდა</text>
+      </svg>
+    `;
+
+    return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+  }
+
+  const TEMP_BOOKS = [
+    {
+      id: "temp-b1",
+      title: "ღრმა ფოკუსი",
+      author: "ნინო კობახიძე",
+      genre: "ბიზნესი",
+      type: "ebook",
+      details: "PDF / EPUB",
+      price: 18.9,
+      description: "პრაქტიკული წიგნი კონცენტრაციის, დროის მართვის და ღრმა მუშაობის ჩვევებზე.",
+      topPick: true,
+      ageRestricted: false,
+      uploaderId: "temp-author-1",
+      fileName: "ghrma-fokusi.pdf",
+      coverName: "ghrma-fokusi.svg",
+      coverPath: "",
+      filePath: "",
+      coverUrl: createTempCoverUrl({
+        title: "ღრმა ფოკუსი",
+        author: "ნინო კობახიძე",
+        genre: "ბიზნესი",
+        typeLabel: "ელექტრონული წიგნი",
+        colors: ["#0f4c81", "#2e7cc4", "#b8d9ff"]
+      }),
+      createdAt: "2026-03-18T09:00:00.000Z",
+      updatedAt: "2026-03-18T09:00:00.000Z"
+    },
+    {
+      id: "temp-b2",
+      title: "ფინანსური სიმშვიდე",
+      author: "თამარ ბურდული",
+      genre: "ბიზნესი",
+      type: "ebook",
+      details: "PDF / EPUB",
+      price: 22,
+      description: "მარტივად ახსნილი პირადი ფინანსები, დაგეგმვა და ფულის მართვის ყოველდღიური წესები.",
+      topPick: false,
+      ageRestricted: false,
+      uploaderId: "temp-author-2",
+      fileName: "finansuri-simshvide.pdf",
+      coverName: "finansuri-simshvide.svg",
+      coverPath: "",
+      filePath: "",
+      coverUrl: createTempCoverUrl({
+        title: "ფინანსური სიმშვიდე",
+        author: "თამარ ბურდული",
+        genre: "ბიზნესი",
+        typeLabel: "ელექტრონული წიგნი",
+        colors: ["#14466b", "#4e9dcf", "#d7f0ff"]
+      }),
+      createdAt: "2026-03-19T10:30:00.000Z",
+      updatedAt: "2026-03-19T10:30:00.000Z"
+    },
+    {
+      id: "temp-b3",
+      title: "მშვიდი გონების პრაქტიკა",
+      author: "მარიამ ჯაფარიძე",
+      genre: "ფსიქოლოგია",
+      type: "ebook",
+      details: "PDF / EPUB / MOBI",
+      price: 21.5,
+      description: "სტრესის შემცირების, ემოციური ბალანსის და შინაგანი სიმშვიდის პრაქტიკული სახელმძღვანელო.",
+      topPick: true,
+      ageRestricted: false,
+      uploaderId: "temp-author-3",
+      fileName: "mshvidi-gonebis-praqtika.epub",
+      coverName: "mshvidi-gonebis-praqtika.svg",
+      coverPath: "",
+      filePath: "",
+      coverUrl: createTempCoverUrl({
+        title: "მშვიდი გონების პრაქტიკა",
+        author: "მარიამ ჯაფარიძე",
+        genre: "ფსიქოლოგია",
+        typeLabel: "ელექტრონული წიგნი",
+        colors: ["#2c5f7f", "#75b7d3", "#e2f7ff"]
+      }),
+      createdAt: "2026-03-21T08:45:00.000Z",
+      updatedAt: "2026-03-21T08:45:00.000Z"
+    },
+    {
+      id: "temp-b4",
+      title: "ქალაქი წვიმის შემდეგ",
+      author: "ლიკა ბერიძე",
+      genre: "რომანი",
+      type: "ebook",
+      details: "PDF / EPUB",
+      price: 16.4,
+      description: "თანამედროვე რომანი სიყვარულზე, დაკარგვაზე და ქალაქის სიჩუმეში საკუთარ თავთან შეხვედრაზე.",
+      topPick: false,
+      ageRestricted: false,
+      uploaderId: "temp-author-4",
+      fileName: "qalaqi-wvimi-shemdeg.pdf",
+      coverName: "qalaqi-wvimi-shemdeg.svg",
+      coverPath: "",
+      filePath: "",
+      coverUrl: createTempCoverUrl({
+        title: "ქალაქი წვიმის შემდეგ",
+        author: "ლიკა ბერიძე",
+        genre: "რომანი",
+        typeLabel: "ელექტრონული წიგნი",
+        colors: ["#3e4f88", "#7d9ee0", "#eef4ff"]
+      }),
+      createdAt: "2026-03-24T12:20:00.000Z",
+      updatedAt: "2026-03-24T12:20:00.000Z"
+    },
+    {
+      id: "temp-b5",
+      title: "გზაში მოსასმენი მოტივაცია",
+      author: "პოდკასტ სტუდიო",
+      genre: "მოტივაცია",
+      type: "audio",
+      details: "4სთ 20წთ",
+      price: 17,
+      description: "მოკლე აუდიო თავები ყოველდღიური ენერგიის, მოტივაციის და პროდუქტიულობისთვის.",
+      topPick: true,
+      ageRestricted: false,
+      uploaderId: "temp-author-5",
+      fileName: "gzashi-motivacia.mp3",
+      coverName: "gzashi-motivacia.svg",
+      coverPath: "",
+      filePath: "",
+      coverUrl: createTempCoverUrl({
+        title: "გზაში მოსასმენი მოტივაცია",
+        author: "პოდკასტ სტუდიო",
+        genre: "მოტივაცია",
+        typeLabel: "აუდიო წიგნი",
+        colors: ["#0b6b7c", "#2cb0c5", "#dbfdff"]
+      }),
+      createdAt: "2026-03-22T07:40:00.000Z",
+      updatedAt: "2026-03-22T07:40:00.000Z"
+    },
+    {
+      id: "temp-b6",
+      title: "დილის აუდიო რუტინა",
+      author: "გიორგი თაბაგარი",
+      genre: "მოტივაცია",
+      type: "audio",
+      details: "2სთ 45წთ",
+      price: 13.9,
+      description: "მოსასმენი აუდიო პროგრამა დილის ჩვევების, ფოკუსის და სიმშვიდისთვის.",
+      topPick: false,
+      ageRestricted: false,
+      uploaderId: "temp-author-6",
+      fileName: "dilis-audio-rutina.mp3",
+      coverName: "dilis-audio-rutina.svg",
+      coverPath: "",
+      filePath: "",
+      coverUrl: createTempCoverUrl({
+        title: "დილის აუდიო რუტინა",
+        author: "გიორგი თაბაგარი",
+        genre: "მოტივაცია",
+        typeLabel: "აუდიო წიგნი",
+        colors: ["#1b6a67", "#50c8b8", "#ebfffb"]
+      }),
+      createdAt: "2026-03-23T06:10:00.000Z",
+      updatedAt: "2026-03-23T06:10:00.000Z"
+    },
+    {
+      id: "temp-b7",
+      title: "ფსიქოლოგია ხმაში",
+      author: "მარიამ ჯაფარიძე",
+      genre: "ფსიქოლოგია",
+      type: "audio",
+      details: "3სთ 30წთ",
+      price: 18.5,
+      description: "ფსიქოლოგიური აუდიოწიგნი თვითშეფასებაზე, საზღვრებზე და ემოციურ გამძლეობაზე.",
+      topPick: false,
+      ageRestricted: false,
+      uploaderId: "temp-author-3",
+      fileName: "fsiqologia-khmashi.mp3",
+      coverName: "fsiqologia-khmashi.svg",
+      coverPath: "",
+      filePath: "",
+      coverUrl: createTempCoverUrl({
+        title: "ფსიქოლოგია ხმაში",
+        author: "მარიამ ჯაფარიძე",
+        genre: "ფსიქოლოგია",
+        typeLabel: "აუდიო წიგნი",
+        colors: ["#24606d", "#62b1be", "#ecffff"]
+      }),
+      createdAt: "2026-03-25T18:20:00.000Z",
+      updatedAt: "2026-03-25T18:20:00.000Z"
+    },
+    {
+      id: "temp-b8",
+      title: "შუაღამის წერილები",
+      author: "ანა დვალიშვილი",
+      genre: "რომანი",
+      type: "ebook",
+      details: "PDF / EPUB",
+      price: 17.8,
+      description: "ემოციური ისტორია დაკარგულ ურთიერთობებზე და ახალ დასაწყისებზე.",
+      topPick: true,
+      ageRestricted: false,
+      uploaderId: "temp-author-7",
+      fileName: "shuaghmis-werilebi.pdf",
+      coverName: "shuaghmis-werilebi.svg",
+      coverPath: "",
+      filePath: "",
+      coverUrl: createTempCoverUrl({
+        title: "შუაღამის წერილები",
+        author: "ანა დვალიშვილი",
+        genre: "რომანი",
+        typeLabel: "ელექტრონული წიგნი",
+        colors: ["#243b73", "#5f83d8", "#eff3ff"]
+      }),
+      createdAt: "2026-03-26T10:10:00.000Z",
+      updatedAt: "2026-03-26T10:10:00.000Z"
+    },
+    {
+      id: "temp-b9",
+      title: "კონფიდენციალური რომანი 18+",
+      author: "დ. ქავთარაძე",
+      genre: "რომანი",
+      type: "ebook",
+      details: "PDF / EPUB",
+      price: 23.9,
+      description: "ზრდასრულ აუდიტორიაზე გათვლილი მხატვრული ტექსტი ურთიერთობების, დაძაბულობის და ინტიმური თემებით.",
+      topPick: false,
+      ageRestricted: true,
+      uploaderId: "temp-author-8",
+      fileName: "konfidencialuri-romani.pdf",
+      coverName: "konfidencialuri-romani.svg",
+      coverPath: "",
+      filePath: "",
+      coverUrl: createTempCoverUrl({
+        title: "კონფიდენციალური რომანი 18+",
+        author: "დ. ქავთარაძე",
+        genre: "რომანი",
+        typeLabel: "ელექტრონული წიგნი",
+        colors: ["#5a2d68", "#a064b8", "#f5e8ff"]
+      }),
+      createdAt: "2026-03-27T11:05:00.000Z",
+      updatedAt: "2026-03-27T11:05:00.000Z"
+    }
+  ];
+
+  const TEMP_SALES_BASE = [
+    {
+      id: "temp-s1",
+      bookId: "temp-b1",
+      book: "ღრმა ფოკუსი",
+      buyer: "reader1@example.com",
+      amount: 18.9,
+      createdAt: "2026-03-22T11:10:00.000Z"
+    },
+    {
+      id: "temp-s2",
+      bookId: "temp-b5",
+      book: "გზაში მოსასმენი მოტივაცია",
+      buyer: "reader2@example.com",
+      amount: 17,
+      createdAt: "2026-03-24T15:30:00.000Z"
+    },
+    {
+      id: "temp-s3",
+      bookId: "temp-b8",
+      book: "შუაღამის წერილები",
+      buyer: "reader3@example.com",
+      amount: 17.8,
+      createdAt: "2026-03-26T19:20:00.000Z"
+    }
+  ];
+
+  function getTempBooks() {
+    return clone(TEMP_BOOKS);
+  }
+
+  function getTempBook(id) {
+    const match = TEMP_BOOKS.find((book) => book.id === id);
+    return match ? clone(match) : null;
+  }
+
+  function readTempSales() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(TEMP_SALES_KEY) || "null");
+      if (Array.isArray(saved) && saved.length) {
+        return saved;
+      }
+    } catch (error) {
+      // fall through to defaults
+    }
+
+    localStorage.setItem(TEMP_SALES_KEY, JSON.stringify(TEMP_SALES_BASE));
+    return clone(TEMP_SALES_BASE);
+  }
+
+  function writeTempSales(sales) {
+    localStorage.setItem(TEMP_SALES_KEY, JSON.stringify(sales));
+  }
+
+  function createTempSale(payload, book) {
+    const sales = readTempSales();
+    const sale = {
+      id: `temp-s${Date.now()}`,
+      bookId: book.id,
+      book: book.title,
+      buyer: payload.buyerEmail || "guest@example.com",
+      amount: Number(payload.amount || book.price || 0),
+      createdAt: new Date().toISOString()
+    };
+
+    sales.unshift(sale);
+    writeTempSales(sales);
+    return sale;
   }
 
   function getPublicCoverUrl(path) {
@@ -199,12 +581,21 @@
     }
 
     cacheToken(data.session);
-    const profile = await getCurrentProfile();
 
-    return {
-      token: data.session?.access_token || "",
-      user: profile
-    };
+    try {
+      const profile = await getCurrentProfile();
+      return {
+        token: data.session?.access_token || "",
+        user: profile
+      };
+    } catch (profileError) {
+      const fallbackProfile = normalizeProfileRow(null, data.user);
+      cacheUser(fallbackProfile);
+      return {
+        token: data.session?.access_token || "",
+        user: fallbackProfile
+      };
+    }
   }
 
   async function signUp(payload) {
@@ -234,43 +625,69 @@
       };
     }
 
-    const profile = await getCurrentProfile();
-
-    return {
-      success: true,
-      message: "რეგისტრაცია დასრულდა, შეგიძლია ატვირთვა დაიწყო",
-      token: data.session?.access_token || "",
-      user: profile
-    };
+    try {
+      const profile = await getCurrentProfile();
+      return {
+        success: true,
+        message: "რეგისტრაცია დასრულდა, შეგიძლია ატვირთვა დაიწყო",
+        token: data.session?.access_token || "",
+        user: profile
+      };
+    } catch (profileError) {
+      const fallbackProfile = normalizeProfileRow(null, data.user);
+      cacheUser(fallbackProfile);
+      return {
+        success: true,
+        message: "რეგისტრაცია დასრულდა, შეგიძლია ატვირთვა დაიწყო",
+        token: data.session?.access_token || "",
+        user: fallbackProfile
+      };
+    }
   }
 
   async function getBooks() {
     const supabase = getClient();
-    const { data, error } = await supabase
-      .from("books")
-      .select("*")
-      .order("created_at", { ascending: false });
 
-    if (error) {
-      throw error;
+    try {
+      const { data, error } = await supabase
+        .from("books")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      const books = (data || []).map(mapBookRow);
+      return books.length ? books : getTempBooks();
+    } catch (error) {
+      return getTempBooks();
     }
-
-    return (data || []).map(mapBookRow);
   }
 
   async function getBook(id) {
-    const supabase = getClient();
-    const { data, error } = await supabase
-      .from("books")
-      .select("*")
-      .eq("id", id)
-      .maybeSingle();
-
-    if (error) {
-      throw error;
+    const tempBook = getTempBook(id);
+    if (tempBook) {
+      return tempBook;
     }
 
-    return data ? mapBookRow(data) : null;
+    const supabase = getClient();
+
+    try {
+      const { data, error } = await supabase
+        .from("books")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+
+      if (error) {
+        throw error;
+      }
+
+      return data ? mapBookRow(data) : null;
+    } catch (error) {
+      return null;
+    }
   }
 
   async function getMyBooks() {
@@ -362,6 +779,10 @@
       throw new Error("რედაქტირებისთვის წიგნი ვერ მოიძებნა");
     }
 
+    if (String(existing.id).startsWith("temp-")) {
+      throw new Error("დროებითი სატესტო წიგნის რედაქტირება ვერ მოხერხდება. ჯერ ატვირთე რეალური წიგნი.");
+    }
+
     if (!(profile.role === "admin" || profile.id === existing.uploaderId)) {
       throw new Error("ამ წიგნის რედაქტირების უფლება არ გაქვს");
     }
@@ -415,23 +836,31 @@
       throw new Error("პანელის სანახავად ჯერ შედი ავტორის ანგარიშით");
     }
 
-    const [booksResult, usersResult, salesResult] = await Promise.all([
-      supabase.from("books").select("id", { count: "exact", head: true }),
-      profile.role === "admin"
-        ? supabase.from("profiles").select("id", { count: "exact", head: true })
-        : supabase.from("profiles").select("id", { count: "exact", head: true }).eq("id", profile.id),
-      supabase.from("sales").select("id", { count: "exact", head: true })
-    ]);
+    try {
+      const [booksResult, usersResult, salesResult] = await Promise.all([
+        supabase.from("books").select("id", { count: "exact", head: true }),
+        profile.role === "admin"
+          ? supabase.from("profiles").select("id", { count: "exact", head: true })
+          : supabase.from("profiles").select("id", { count: "exact", head: true }).eq("id", profile.id),
+        supabase.from("sales").select("id", { count: "exact", head: true })
+      ]);
 
-    if (booksResult.error) throw booksResult.error;
-    if (usersResult.error) throw usersResult.error;
-    if (salesResult.error) throw salesResult.error;
+      if (booksResult.error) throw booksResult.error;
+      if (usersResult.error) throw usersResult.error;
+      if (salesResult.error) throw salesResult.error;
 
-    return {
-      books: booksResult.count || 0,
-      users: usersResult.count || 0,
-      sales: salesResult.count || 0
-    };
+      return {
+        books: booksResult.count || getTempBooks().length,
+        users: usersResult.count || 1,
+        sales: salesResult.count || readTempSales().length
+      };
+    } catch (error) {
+      return {
+        books: getTempBooks().length,
+        users: 1,
+        sales: readTempSales().length
+      };
+    }
   }
 
   async function getUsers() {
@@ -445,16 +874,20 @@
       return [profile];
     }
 
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("id, full_name, email, role, created_at")
-      .order("created_at", { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, full_name, email, role, created_at")
+        .order("created_at", { ascending: false });
 
-    if (error) {
-      throw error;
+      if (error) {
+        throw error;
+      }
+
+      return (data || []).map(mapProfileRow);
+    } catch (error) {
+      return [profile];
     }
-
-    return (data || []).map(mapProfileRow);
   }
 
   async function getSales() {
@@ -464,16 +897,21 @@
       throw new Error("პანელის სანახავად ჯერ შედი ავტორის ანგარიშით");
     }
 
-    const { data, error } = await supabase
-      .from("sales")
-      .select("*")
-      .order("created_at", { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from("sales")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-    if (error) {
-      throw error;
+      if (error) {
+        throw error;
+      }
+
+      const sales = (data || []).map(mapSaleRow);
+      return sales.length ? sales : readTempSales();
+    } catch (error) {
+      return readTempSales();
     }
-
-    return (data || []).map(mapSaleRow);
   }
 
   async function createPaymentIntent(payload) {
@@ -484,27 +922,45 @@
       throw new Error("არჩეული წიგნი ვერ მოიძებნა");
     }
 
-    const { error } = await supabase
-      .from("sales")
-      .insert({
-        book_id: book.id,
-        book_title: book.title,
-        buyer_name: payload.buyerName || "მყიდველი",
-        buyer_email: payload.buyerEmail || "guest@example.com",
-        buyer_phone: payload.buyerPhone || "",
-        payment_method: payload.paymentMethod || "card",
-        amount: Number(payload.amount || book.price || 0)
-      });
-
-    if (error) {
-      throw error;
+    if (String(book.id).startsWith("temp-")) {
+      createTempSale(payload, book);
+      return {
+        success: true,
+        clientSecret: "temp-sale-recorded",
+        message: "დროებითი სატესტო შეძენა შესრულდა"
+      };
     }
 
-    return {
-      success: true,
-      clientSecret: "supabase-sale-recorded",
-      message: "შეძენა დადასტურდა და ჩანაწერი შეინახა Supabase-ში"
-    };
+    try {
+      const { error } = await supabase
+        .from("sales")
+        .insert({
+          book_id: book.id,
+          book_title: book.title,
+          buyer_name: payload.buyerName || "მყიდველი",
+          buyer_email: payload.buyerEmail || "guest@example.com",
+          buyer_phone: payload.buyerPhone || "",
+          payment_method: payload.paymentMethod || "card",
+          amount: Number(payload.amount || book.price || 0)
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      return {
+        success: true,
+        clientSecret: "supabase-sale-recorded",
+        message: "შეძენა დადასტურდა და ჩანაწერი შეინახა Supabase-ში"
+      };
+    } catch (error) {
+      createTempSale(payload, book);
+      return {
+        success: true,
+        clientSecret: "temp-sale-recorded",
+        message: "შეძენა დროებით სატესტო რეჟიმში შეინახა"
+      };
+    }
   }
 
   async function syncSessionUser() {
