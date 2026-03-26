@@ -10,6 +10,17 @@
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
+  function withTimeout(promise, timeoutMs = 6000) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => {
+        window.setTimeout(() => {
+          reject(new Error("Supabase request timed out"));
+        }, timeoutMs);
+      })
+    ]);
+  }
+
   function isConfigured() {
     const config = getConfig();
     return Boolean(window.supabase && config.SUPABASE_URL && config.SUPABASE_ANON_KEY);
@@ -776,10 +787,12 @@
     const supabase = getClient();
 
     try {
-      const { data, error } = await supabase
-        .from("books")
-        .select("*")
-        .order("created_at", { ascending: false });
+      const { data, error } = await withTimeout(
+        supabase
+          .from("books")
+          .select("*")
+          .order("created_at", { ascending: false })
+      );
 
       if (error) {
         throw error;
@@ -801,11 +814,13 @@
     const supabase = getClient();
 
     try {
-      const { data, error } = await supabase
-        .from("books")
-        .select("*")
-        .eq("id", id)
-        .maybeSingle();
+      const { data, error } = await withTimeout(
+        supabase
+          .from("books")
+          .select("*")
+          .eq("id", id)
+          .maybeSingle()
+      );
 
       if (error) {
         throw error;
