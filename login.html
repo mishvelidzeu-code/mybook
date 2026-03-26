@@ -3,39 +3,39 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#06070a" />
-  <title>Login — NoirLeaf</title>
+  <meta name="theme-color" content="#edf5ff" />
+  <title>პანელში შესვლა — ლურჯი თარო</title>
   <link rel="stylesheet" href="assets/css/styles.css" />
   <link rel="stylesheet" href="assets/css/auth.css" />
 </head>
 <body>
   <main class="auth-page">
-    <section class="auth-card glass">
-      <a class="auth-back" href="index.html">← მთავარი</a>
+    <section class="auth-card surface">
+      <a class="auth-back" href="index.html">← მთავარ ბიბლიოთეკაში დაბრუნება</a>
 
       <div class="auth-brand">
-        <div class="brand-mark">N</div>
+        <div class="brand-mark">ლთ</div>
         <div>
-          <h1>Welcome Back</h1>
-          <p>შედი შენს ანგარიშში</p>
+          <h1>ავტორის პანელში შესვლა</h1>
+          <p>ეს გვერდი განკუთვნილია მხოლოდ ავტორისთვის, გამომცემლისთვის და ადმინისტრატორისთვის</p>
         </div>
       </div>
 
       <form id="loginForm" class="auth-form">
-        <input id="loginEmail" class="input" type="email" placeholder="Email" autocomplete="email" required />
+        <input id="loginEmail" class="input" type="email" placeholder="ელფოსტა" autocomplete="email" required />
         <input
           id="loginPassword"
           class="input"
           type="password"
-          placeholder="Password"
+          placeholder="პაროლი"
           autocomplete="current-password"
           required
         />
-        <button class="primary-btn full" type="submit">Login</button>
+        <button class="primary-btn full" type="submit">პანელში შესვლა</button>
       </form>
 
       <div id="loginMessage" class="form-message" aria-live="polite"></div>
-      <p class="auth-switch">არ გაქვს ანგარიში? <a href="register.html">რეგისტრაცია</a></p>
+      <p class="auth-switch">თუ ატვირთვა გინდა და ანგარიში ჯერ არ გაქვს, <a href="register.html">დარეგისტრირდი აქ</a>.</p>
     </section>
   </main>
 

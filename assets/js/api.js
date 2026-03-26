@@ -1,75 +1,142 @@
 (function () {
-  const DEMO_STORE_KEY = "noirleaf-demo-store";
+  const DEMO_STORE_KEY = "lurji-taro-demo-store";
+  const DEMO_STORE_VERSION = 2;
 
   const defaultDemoStore = {
+    version: DEMO_STORE_VERSION,
     users: [
       {
         id: 1,
-        name: "Admin User",
-        email: "admin@noirleaf.com",
+        name: "ადმინისტრატორი",
+        email: "admin@lurjitaro.ge",
         password: "admin123",
         role: "admin",
         createdAt: "2026-03-20T10:00:00.000Z"
       },
       {
         id: 2,
-        name: "Ucha Mishvelidze",
-        email: "ucha@example.com",
+        name: "ნინო კობახიძე",
+        email: "nino@author.ge",
         password: "author123",
         role: "author",
         createdAt: "2026-03-21T11:30:00.000Z"
+      },
+      {
+        id: 3,
+        name: "პოდკასტ სტუდიო",
+        email: "studio@audio.ge",
+        password: "publisher123",
+        role: "publisher",
+        createdAt: "2026-03-22T09:10:00.000Z"
       }
     ],
     books: [
       {
         id: "b1",
-        title: "შენ არ ხარ შემთხვევითი",
-        author: "Ucha Studio",
-        genre: "მოტივაცია",
-        price: 19.99,
-        description: "მოკლე, ძლიერი და გაყიდვადი წიგნი ციფრული თაობისთვის.",
-        createdAt: "2026-03-22T08:00:00.000Z"
+        title: "ღრმა ფოკუსი",
+        author: "ნინო კობახიძე",
+        genre: "ბიზნესი",
+        type: "ebook",
+        details: "PDF / EPUB",
+        price: 18.9,
+        description: "პრაქტიკული წიგნი მათთვის, ვინც სამუშაოს და სწავლას ერთიან რიტმში აწყობს.",
+        topPick: true,
+        createdAt: "2026-03-24T08:00:00.000Z"
       },
       {
         id: "b2",
-        title: "დისციპლინის ძალა",
-        author: "NoirLeaf Originals",
-        genre: "ბიზნესი",
-        price: 24.0,
-        description: "პრაქტიკული სისტემა მაღალი შედეგებისთვის.",
-        createdAt: "2026-03-23T08:00:00.000Z"
+        title: "დილის პატარა ჩვევა",
+        author: "თამარ ბურდული",
+        genre: "მოტივაცია",
+        type: "ebook",
+        details: "PDF / EPUB",
+        price: 14.5,
+        description: "მოკლე და სასიამოვნო გზამკვლევი დილის რუტინის შესაქმნელად.",
+        topPick: false,
+        createdAt: "2026-03-25T08:00:00.000Z"
       },
       {
         id: "b3",
-        title: "ფსიქოლოგია გამარჯვებისთვის",
-        author: "N. Atelier",
+        title: "ფსიქოლოგია მშვიდი გონებისთვის",
+        author: "მარიამ ჯაფარიძე",
         genre: "ფსიქოლოგია",
-        price: 29.0,
-        description: "გონებრივი ფოკუსის და თვითკონტროლის პრემიუმ გზამკვლევი.",
-        createdAt: "2026-03-24T08:00:00.000Z"
+        type: "ebook",
+        details: "PDF / EPUB / MOBI",
+        price: 21.0,
+        description: "დაძაბული დღის ფონზე ყურადღების, ემოციის და ენერგიის მართვის წიგნი.",
+        topPick: true,
+        createdAt: "2026-03-26T07:50:00.000Z"
+      },
+      {
+        id: "b4",
+        title: "გზაში მოსასმენი მოტივაცია",
+        author: "პოდკასტ სტუდიო",
+        genre: "მოტივაცია",
+        type: "audio",
+        details: "4სთ 20წთ",
+        price: 17.0,
+        description: "მოკლე აუდიო ეპიზოდებად დაყოფილი მოტივაციური ჩანაწერები ყოველდღიური ტემპისთვის.",
+        topPick: true,
+        createdAt: "2026-03-23T13:10:00.000Z"
+      },
+      {
+        id: "b5",
+        title: "რომანი ზღვის პირას",
+        author: "ლიკა ბერიძე",
+        genre: "რომანი",
+        type: "audio",
+        details: "6სთ 05წთ",
+        price: 24.0,
+        description: "სასიამოვნო აუდიო რომანი თბილი ტემპით, მოგზაურობისა და დასვენებისთვის.",
+        topPick: false,
+        createdAt: "2026-03-26T09:00:00.000Z"
+      },
+      {
+        id: "b6",
+        title: "საკუთარი ტემპის პოვნა",
+        author: "ნინო კობახიძე",
+        genre: "თვითგანვითარება",
+        type: "ebook",
+        details: "PDF / EPUB",
+        price: 19.0,
+        description: "რბილი, პრაქტიკული და მკითხველზე მორგებული ტექსტი შინაგანი რიტმის შესაქმნელად.",
+        topPick: false,
+        createdAt: "2026-03-26T11:20:00.000Z"
+      },
+      {
+        id: "b7",
+        title: "აუდიო ბლოკნოტი წარმატებისთვის",
+        author: "გიორგი თაბაგარი",
+        genre: "ბიზნესი",
+        type: "audio",
+        details: "3სთ 40წთ",
+        price: 16.5,
+        description: "ხმის ჩანაწერების ფორმატში შედგენილი კონცენტრირებული იდეები შედეგიანობისთვის.",
+        topPick: false,
+        createdAt: "2026-03-25T16:40:00.000Z"
       }
     ],
     sales: [
       {
         id: "s1",
         bookId: "b1",
-        book: "შენ არ ხარ შემთხვევითი",
+        book: "ღრმა ფოკუსი",
         buyer: "reader1@mail.com",
-        amount: 19.99,
-        createdAt: "2026-03-24T15:10:00.000Z"
+        amount: 18.9,
+        createdAt: "2026-03-25T12:10:00.000Z"
       },
       {
         id: "s2",
-        bookId: "b2",
-        book: "დისციპლინის ძალა",
+        bookId: "b4",
+        book: "გზაში მოსასმენი მოტივაცია",
         buyer: "reader2@mail.com",
-        amount: 24.0,
+        amount: 17.0,
         createdAt: "2026-03-25T16:40:00.000Z"
       }
     ],
     counters: {
-      user: 3,
-      book: 4,
+      user: 4,
+      book: 8,
       sale: 3
     }
   };
@@ -91,6 +158,11 @@
     localStorage.setItem(key, JSON.stringify(value));
   }
 
+  function clearSession() {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+  }
+
   function getCurrentUser() {
     return readJson("user");
   }
@@ -103,16 +175,25 @@
 
   function ensureDemoStore() {
     const store = readJson(DEMO_STORE_KEY);
-    if (store && Array.isArray(store.users) && Array.isArray(store.books) && Array.isArray(store.sales)) {
+
+    if (
+      store
+      && store.version === DEMO_STORE_VERSION
+      && Array.isArray(store.users)
+      && Array.isArray(store.books)
+      && Array.isArray(store.sales)
+    ) {
       return store;
     }
 
+    clearSession();
     const seeded = clone(defaultDemoStore);
     writeJson(DEMO_STORE_KEY, seeded);
     return seeded;
   }
 
   function saveDemoStore(store) {
+    store.version = DEMO_STORE_VERSION;
     writeJson(DEMO_STORE_KEY, store);
   }
 
@@ -129,19 +210,20 @@
   }
 
   function nextId(store, type, prefix) {
+    const nextValue = store.counters[type];
     store.counters[type] += 1;
-    return `${prefix}${store.counters[type] - 1}`;
+    return `${prefix}${nextValue}`;
   }
 
   function requireDemoUser(roles) {
     const user = getCurrentUser();
 
     if (!user) {
-      throw new Error("გთხოვ ჯერ შეხვიდე სისტემაში");
+      throw new Error("ატვირთვისთვის ან პანელისთვის საჭიროა ავტორის ანგარიშით შესვლა");
     }
 
     if (Array.isArray(roles) && !roles.includes(user.role)) {
-      throw new Error("ამ მოქმედებისთვის საჭიროა author ან admin ანგარიში");
+      throw new Error("ამ მოქმედებისთვის საჭიროა ავტორი, გამომცემლობა ან ადმინისტრატორი");
     }
 
     return user;
@@ -162,7 +244,7 @@
         });
 
         if (!user) {
-          throw new Error("Email ან password არასწორია");
+          throw new Error("ელფოსტა ან პაროლი არასწორია");
         }
 
         return {
@@ -180,15 +262,16 @@
         }
 
         if (store.users.some((entry) => entry.email.toLowerCase() === email)) {
-          throw new Error("ეს email უკვე გამოყენებულია");
+          throw new Error("ეს ელფოსტა უკვე გამოყენებულია");
         }
 
+        const role = payload.role === "publisher" ? "publisher" : "author";
         const newUser = {
           id: store.counters.user,
           name: String(payload.name).trim(),
           email,
           password: String(payload.password),
-          role: payload.role === "author" ? "author" : "reader",
+          role,
           createdAt: new Date().toISOString()
         };
 
@@ -198,7 +281,8 @@
 
         return {
           success: true,
-          message: "ანგარიში წარმატებით შეიქმნა",
+          message: "რეგისტრაცია დასრულდა, შეგიძლია ატვირთვა დაიწყო",
+          token: `demo-token-${newUser.id}`,
           user: sanitizeUser(newUser)
         };
       }
@@ -214,16 +298,18 @@
       }
 
       if (path === "/books/upload" && method === "POST") {
-        const user = requireDemoUser(["author", "admin"]);
+        const user = requireDemoUser(["author", "publisher", "admin"]);
         const payload = options.body instanceof FormData ? options.body : null;
 
         if (!payload) {
-          throw new Error("FormData payload ვერ მოიძებნა");
+          throw new Error("ატვირთვის მონაცემები ვერ მოიძებნა");
         }
 
         const title = String(payload.get("title") || "").trim();
         const author = String(payload.get("author") || "").trim();
+        const type = String(payload.get("type") || "").trim();
         const genre = String(payload.get("genre") || "").trim();
+        const details = String(payload.get("details") || "").trim();
         const description = String(payload.get("description") || "").trim();
         const price = Number(payload.get("price") || 0);
         const ebook = payload.get("ebook");
@@ -232,14 +318,16 @@
         if (
           !title
           || !author
+          || !["ebook", "audio"].includes(type)
           || !genre
+          || !details
           || !description
           || !Number.isFinite(price)
           || price < 0
           || !ebook
           || !cover
         ) {
-          throw new Error("ატვირთვისთვის ყველა ველია სავალდებულო");
+          throw new Error("გთხოვ შეავსო ყველა ველი და ატვირთო ფაილებიც");
         }
 
         const newBook = {
@@ -247,11 +335,14 @@
           title,
           author,
           genre,
+          type,
+          details,
           price,
           description,
+          topPick: false,
           createdAt: new Date().toISOString(),
           uploaderId: user.id,
-          fileName: typeof ebook === "object" && "name" in ebook ? ebook.name : "ebook-file",
+          fileName: typeof ebook === "object" && "name" in ebook ? ebook.name : "book-file",
           coverName: typeof cover === "object" && "name" in cover ? cover.name : "cover-file"
         };
 
@@ -261,7 +352,7 @@
 
         return {
           success: true,
-          message: "წიგნი წარმატებით აიტვირთა",
+          message: "გამოცემა წარმატებით დაემატა კატალოგს",
           book: clone(newBook)
         };
       }
@@ -287,15 +378,15 @@
         const book = store.books.find((entry) => entry.id === payload.bookId);
 
         if (!book) {
-          throw new Error("გადასახდელი წიგნი ვერ მოიძებნა");
+          throw new Error("არჩეული წიგნი ვერ მოიძებნა");
         }
 
-        const buyer = getCurrentUser();
+        const buyerEmail = String(payload.buyerEmail || "").trim().toLowerCase() || "guest@lurjitaro.demo";
         const sale = {
           id: nextId(store, "sale", "s"),
           bookId: book.id,
           book: book.title,
-          buyer: buyer?.email || "guest@noirleaf.demo",
+          buyer: buyerEmail,
           amount: Number(payload.amount) || Number(book.price) || 0,
           createdAt: new Date().toISOString()
         };
@@ -306,11 +397,11 @@
         return {
           success: true,
           clientSecret: "demo-client-secret",
-          message: "გადახდა წარმატებით სიმულირდა demo რეჟიმში"
+          message: "შეძენა დადასტურდა, წიგნის ბმული გაიგზავნება მითითებულ ელფოსტაზე"
         };
       }
 
-      throw new Error("Demo route not implemented");
+          throw new Error("მითითებული სატესტო მისამართი ვერ დამუშავდა");
     }
   };
 
@@ -335,7 +426,7 @@
       });
 
       if (!response.ok) {
-        let errorMessage = "Request failed";
+        let errorMessage = "მოთხოვნა ვერ შესრულდა";
 
         try {
           const errorData = await response.json();

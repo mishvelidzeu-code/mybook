@@ -38,12 +38,12 @@
       currentBook = book;
 
       if (!book) {
-        showPaymentMessage("წიგნი ვერ მოიძებნა, აირჩიე სხვა პროდუქტი.", "error");
+        showPaymentMessage("წიგნი ვერ მოიძებნა, გთხოვ აირჩიე სხვა გამოცემა.", "error");
         paymentForm.querySelector('button[type="submit"]').disabled = true;
       }
     })
     .catch((error) => {
-      showPaymentMessage(error.message || "Checkout ვერ ჩაიტვირთა", "error");
+      showPaymentMessage(error.message || "შეძენის გვერდი ვერ ჩაიტვირთა", "error");
       paymentForm.querySelector('button[type="submit"]').disabled = true;
     });
 
@@ -51,7 +51,7 @@
     event.preventDefault();
 
     if (!currentBook) {
-      showPaymentMessage("გადასახდელი წიგნი ვერ მოიძებნა", "error");
+      showPaymentMessage("არჩეული წიგნი ვერ მოიძებნა", "error");
       return;
     }
 
@@ -61,18 +61,17 @@
     try {
       const result = await Api.createPaymentIntent({
         bookId: currentBook.id,
-        amount: currentBook.price
+        amount: currentBook.price,
+        buyerName: document.getElementById("buyerName").value.trim(),
+        buyerEmail: document.getElementById("buyerEmail").value.trim(),
+        buyerPhone: document.getElementById("buyerPhone").value.trim(),
+        paymentMethod: document.getElementById("paymentMethod").value
       });
 
-      showPaymentMessage(result.message || "გადახდა ინიციალიზებულია", "success");
-
-      // რეალურ გარემოში აქ მიაბამ Stripe / TBC / BOG SDK flow:
-      // 1. backend ქმნის payment intent-ს
-      // 2. frontend იღებს clientSecret-ს
-      // 3. gateway ადასტურებს ტრანზაქციას
-      // 4. წარმატების შემდეგ backend ინახავს sale record-ს
+      showPaymentMessage(result.message || "შეძენა წარმატებით დასრულდა", "success");
+      paymentForm.reset();
     } catch (error) {
-      showPaymentMessage(error.message || "გადახდა ვერ შესრულდა", "error");
+      showPaymentMessage(error.message || "შეძენა ვერ შესრულდა", "error");
     } finally {
       submitButton.disabled = false;
     }

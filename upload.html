@@ -3,47 +3,57 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#06070a" />
-  <title>Upload — NoirLeaf</title>
+  <meta name="theme-color" content="#edf5ff" />
+  <title>ატვირთვა — ლურჯი თარო</title>
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body>
   <div class="app-shell">
-    <header class="topbar glass compact">
-      <div class="brand-wrap">
-        <div class="brand-mark">N</div>
+    <header class="topbar surface compact">
+      <a class="brand-wrap brand-link" href="index.html" aria-label="მთავარ გვერდზე დაბრუნება">
+        <div class="brand-mark">ლთ</div>
         <div>
-          <h1>Upload Book</h1>
-          <p>Real upload logic ready</p>
+          <h1>ახალი გამოცემის ატვირთვა</h1>
+          <p>ეს სივრცე განკუთვნილია მხოლოდ ავტორებისა და გამომცემლებისთვის</p>
         </div>
-      </div>
+      </a>
 
-      <a class="ghost-btn" href="library.html">Library</a>
+      <div class="top-actions">
+        <a class="ghost-btn" href="admin.html">პანელი</a>
+        <a class="ghost-btn" href="library.html">ბიბლიოთეკა</a>
+      </div>
     </header>
 
     <main class="content-stack">
-      <section class="glass panel">
+      <section class="panel surface">
         <div class="section-head">
-          <h2>ახალი წიგნის ატვირთვა</h2>
-          <span>metadata + file upload + backend handoff</span>
+          <h2>ატვირთე ელწიგნი ან აუდიოწიგნი</h2>
+          <span>ყდის რეკომენდებული პროპორციაა 1000 × 1500, რათა კატალოგში სიმეტრია დაცული იყოს</span>
         </div>
 
         <form id="uploadForm" class="stack-form">
           <input id="bookTitle" class="input" type="text" placeholder="წიგნის სათაური" required />
           <input id="bookAuthor" class="input" type="text" placeholder="ავტორი" required />
+          <select id="bookType" class="input" required>
+            <option value="">აირჩიე ტიპი</option>
+            <option value="ebook">ელექტრონული წიგნი</option>
+            <option value="audio">აუდიო წიგნი</option>
+          </select>
           <select id="bookGenre" class="input" required>
             <option value="">აირჩიე ჟანრი</option>
             <option value="ბიზნესი">ბიზნესი</option>
             <option value="მოტივაცია">მოტივაცია</option>
             <option value="ფსიქოლოგია">ფსიქოლოგია</option>
             <option value="რომანი">რომანი</option>
+            <option value="თვითგანვითარება">თვითგანვითარება</option>
           </select>
+          <input id="bookDetails" class="input" type="text" placeholder="ფორმატი ან ხანგრძლივობა, მაგ: PDF / EPUB ან 5სთ 20წთ" required />
           <input id="bookPrice" class="input" type="number" min="0" step="0.01" placeholder="ფასი" required />
-          <textarea id="bookDescription" class="input textarea" placeholder="აღწერა" required></textarea>
+          <textarea id="bookDescription" class="input textarea" placeholder="მოკლე აღწერა" required></textarea>
 
           <label class="upload-field">
-            <span>ატვირთე ebook ფაილი</span>
-            <input id="ebookFile" type="file" accept=".pdf,.epub,.mobi" required />
+            <span>ატვირთე ძირითადი ფაილი</span>
+            <input id="ebookFile" type="file" accept=".pdf,.epub,.mobi,.mp3,.zip" required />
           </label>
 
           <label class="upload-field">
@@ -51,7 +61,7 @@
             <input id="coverFile" type="file" accept="image/*" required />
           </label>
 
-          <button class="primary-btn full" type="submit">ატვირთვა</button>
+          <button class="primary-btn full" type="submit">კატალოგში დამატება</button>
         </form>
 
         <div id="uploadMessage" class="form-message" aria-live="polite"></div>

@@ -1,9 +1,8 @@
 .admin-shell {
-  width: min(100%, 1200px);
+  width: min(100%, 1260px);
   margin: 0 auto;
-  padding: 16px 16px 44px;
+  padding: 18px 16px 42px;
   display: grid;
-  grid-template-columns: 1fr;
   gap: 16px;
 }
 
@@ -15,7 +14,7 @@
 }
 
 .sidebar-brand {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .admin-nav {
@@ -24,13 +23,13 @@
 }
 
 .admin-nav-link {
-  min-height: 50px;
+  min-height: 48px;
   padding: 14px;
   border-radius: 16px;
   text-align: left;
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--title);
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid var(--line);
   transition:
     transform 180ms ease,
     border-color 180ms ease,
@@ -39,9 +38,9 @@
 }
 
 .admin-nav-link.active {
-  color: var(--gold-soft);
-  background: rgba(205, 168, 106, 0.1);
-  border-color: rgba(205, 168, 106, 0.2);
+  background: var(--primary-soft);
+  border-color: rgba(34, 105, 196, 0.22);
+  color: var(--primary);
 }
 
 .admin-main {
@@ -70,8 +69,8 @@
 .admin-stat,
 .admin-row {
   border-radius: 22px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid var(--line);
 }
 
 .admin-stat {
@@ -81,9 +80,9 @@
 .admin-stat strong {
   display: block;
   margin-bottom: 6px;
+  color: var(--title);
+  font-family: "Georgia", serif;
   font-size: clamp(2rem, 8vw, 2.6rem);
-  font-family: "Cormorant Garamond", Georgia, serif;
-  font-weight: 600;
 }
 
 .admin-stat span,
@@ -105,6 +104,7 @@
 .admin-row strong {
   display: block;
   margin-bottom: 4px;
+  color: var(--title);
 }
 
 .admin-row-actions {
@@ -115,9 +115,9 @@
   flex-wrap: wrap;
 }
 
-@media (min-width: 700px) {
+@media (min-width: 760px) {
   .admin-stats {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .admin-row {
@@ -134,12 +134,12 @@
 
   .admin-sidebar {
     position: sticky;
-    top: 16px;
+    top: 18px;
     align-self: start;
   }
 }
 
-@media (max-width: 520px) {
+@media (max-width: 560px) {
   .admin-top {
     display: grid;
   }

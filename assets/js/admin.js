@@ -41,16 +41,20 @@
         <div class="admin-row fade-up">
           <div>
             <strong>${window.AppUtils.escapeHTML(book.title)}</strong>
-            <small>${window.AppUtils.escapeHTML(book.author)} • ${window.AppUtils.escapeHTML(book.genre)}</small>
+            <small>
+              ${window.AppUtils.escapeHTML(book.author)}
+              • ${window.AppUtils.escapeHTML(window.AppUtils.formatTypeLabel(book.type))}
+              • ${window.AppUtils.escapeHTML(book.details)}
+            </small>
           </div>
           <div class="admin-row-actions">
             <span>${window.AppUtils.formatPrice(book.price)}</span>
-            <a class="mini-btn" href="book.html?id=${encodeURIComponent(book.id)}">Open</a>
+            <a class="mini-btn" href="book.html?id=${encodeURIComponent(book.id)}">ნახვა</a>
           </div>
         </div>
       `),
-      "წიგნები არ მოიძებნა",
-      "ატვირთვის შემდეგ აქ გამოჩნდება სრული კატალოგი."
+      "კატალოგი ცარიელია",
+      "ატვირთული წიგნები და აუდიოწიგნები აქ გამოჩნდება."
     );
 
     renderRows(
@@ -62,12 +66,12 @@
             <small>${window.AppUtils.escapeHTML(user.email)}</small>
           </div>
           <div class="admin-row-actions">
-            <span>${window.AppUtils.escapeHTML(user.role)}</span>
+            <span>${window.AppUtils.escapeHTML(window.AppUtils.formatRoleLabel(user.role))}</span>
           </div>
         </div>
       `),
-      "მომხმარებლები არ მოიძებნა",
-      "რეგისტრაციის შემდეგ ახალი ანგარიშები აქ გამოჩნდება."
+      "ავტორები ვერ მოიძებნა",
+      "რეგისტრირებული ანგარიშები აქ გამოჩნდება."
     );
 
     renderRows(
@@ -76,15 +80,18 @@
         <div class="admin-row fade-up">
           <div>
             <strong>${window.AppUtils.escapeHTML(sale.book)}</strong>
-            <small>${window.AppUtils.escapeHTML(sale.buyer)}</small>
+            <small>
+              ${window.AppUtils.escapeHTML(sale.buyer)}
+              • ${window.AppUtils.escapeHTML(window.AppUtils.formatDate(sale.createdAt))}
+            </small>
           </div>
           <div class="admin-row-actions">
             <span>${window.AppUtils.formatPrice(sale.amount)}</span>
           </div>
         </div>
       `),
-      "გაყიდვები არ მოიძებნა",
-      "checkout flow-ის შესრულების შემდეგ ტრანზაქციები აქ დაგროვდება."
+      "გაყიდვები ჯერ არ არის",
+      "1 კლიკით შეძენები აქ დაგროვდება."
     );
   }
 
@@ -103,7 +110,7 @@
       if (dashboard) {
         dashboard.innerHTML = `
           <article class="empty-state">
-            <strong>Admin მონაცემები ვერ ჩაიტვირთა</strong>
+            <strong>პანელი ვერ ჩაიტვირთა</strong>
             <p>${window.AppUtils.escapeHTML(error.message || "გთხოვ სცადო მოგვიანებით.")}</p>
           </article>
         `;

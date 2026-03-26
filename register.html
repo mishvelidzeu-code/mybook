@@ -3,44 +3,44 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#06070a" />
-  <title>Register — NoirLeaf</title>
+  <meta name="theme-color" content="#edf5ff" />
+  <title>ატვირთვისთვის რეგისტრაცია — ლურჯი თარო</title>
   <link rel="stylesheet" href="assets/css/styles.css" />
   <link rel="stylesheet" href="assets/css/auth.css" />
 </head>
 <body>
   <main class="auth-page">
-    <section class="auth-card glass">
-      <a class="auth-back" href="index.html">← მთავარი</a>
+    <section class="auth-card surface">
+      <a class="auth-back" href="index.html">← მკითხველის მთავარ გვერდზე დაბრუნება</a>
 
       <div class="auth-brand">
-        <div class="brand-mark">N</div>
+        <div class="brand-mark">ლთ</div>
         <div>
-          <h1>Create Account</h1>
-          <p>შექმენი ავტორის ან მომხმარებლის ანგარიში</p>
+          <h1>ატვირთვისთვის რეგისტრაცია</h1>
+          <p>მყიდველს რეგისტრაცია არ სჭირდება. ეს ფორმა მხოლოდ ავტორებისა და გამომცემლებისთვისაა.</p>
         </div>
       </div>
 
       <form id="registerForm" class="auth-form">
-        <input id="registerName" class="input" type="text" placeholder="Full name" autocomplete="name" required />
-        <input id="registerEmail" class="input" type="email" placeholder="Email" autocomplete="email" required />
+        <input id="registerName" class="input" type="text" placeholder="სახელი და გვარი" autocomplete="name" required />
+        <input id="registerEmail" class="input" type="email" placeholder="ელფოსტა" autocomplete="email" required />
         <input
           id="registerPassword"
           class="input"
           type="password"
-          placeholder="Password"
+          placeholder="პაროლი"
           autocomplete="new-password"
           required
         />
         <select id="registerRole" class="input">
-          <option value="reader">Reader</option>
-          <option value="author">Author</option>
+          <option value="author">ავტორი</option>
+          <option value="publisher">გამომცემლობა / სტუდია</option>
         </select>
-        <button class="primary-btn full" type="submit">Register</button>
+        <button class="primary-btn full" type="submit">რეგისტრაცია და ატვირთვა</button>
       </form>
 
       <div id="registerMessage" class="form-message" aria-live="polite"></div>
-      <p class="auth-switch">უკვე გაქვს ანგარიში? <a href="login.html">Login</a></p>
+      <p class="auth-switch">თუ ანგარიში უკვე გაქვს, <a href="login.html">პანელში შედი</a>.</p>
     </section>
   </main>
 

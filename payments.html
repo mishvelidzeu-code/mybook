@@ -3,73 +3,53 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#06070a" />
-  <title>Checkout — NoirLeaf</title>
+  <meta name="theme-color" content="#edf5ff" />
+  <title>ერთკლიკიანი შეძენა — ლურჯი თარო</title>
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body>
   <div class="app-shell">
-    <header class="topbar glass compact">
-      <div class="brand-wrap">
-        <div class="brand-mark">N</div>
+    <header class="topbar surface compact">
+      <a class="brand-wrap brand-link" href="index.html" aria-label="მთავარ გვერდზე დაბრუნება">
+        <div class="brand-mark">ლთ</div>
         <div>
-          <h1>Checkout</h1>
-          <p>Secure payment flow</p>
+          <h1>ერთკლიკიანი შეძენა</h1>
+          <p>მყიდველისთვის ავტორიზაცია საჭირო არ არის</p>
         </div>
-      </div>
-      <a class="ghost-btn" href="library.html">Library</a>
+      </a>
+      <a class="ghost-btn" href="library.html">ბიბლიოთეკა</a>
     </header>
 
     <main class="content-stack">
-      <section class="glass panel checkout-box">
+      <section class="panel surface checkout-box">
         <div class="section-head">
-          <h2>გადახდა</h2>
-          <span>Payment intent structure ready</span>
+          <h2>შეძენის დასრულება</h2>
+          <span>შეავსე საკონტაქტო ინფორმაცია და დაადასტურე შეძენა</span>
         </div>
 
         <div class="checkout-summary">
           <div>
-            <strong id="checkoutBookName">Selected Book</strong>
-            <p>Premium ebook purchase</p>
+            <strong id="checkoutBookName">არჩეული წიგნი</strong>
+            <p>ფაილი გადმოგეგზავნება მითითებულ ელფოსტაზე</p>
           </div>
           <strong id="checkoutBookPrice">₾0.00</strong>
         </div>
 
         <form id="paymentForm" class="stack-form">
-          <input id="cardName" class="input" type="text" placeholder="Name on card" autocomplete="cc-name" required />
-          <input
-            id="cardNumber"
-            class="input"
-            type="text"
-            inputmode="numeric"
-            placeholder="Card number"
-            autocomplete="cc-number"
-            required
-          />
+          <input id="buyerName" class="input" type="text" placeholder="სახელი და გვარი" required />
+          <input id="buyerEmail" class="input" type="email" placeholder="ელფოსტა" required />
           <div class="grid-2">
-            <input
-              id="cardExpiry"
-              class="input"
-              type="text"
-              inputmode="numeric"
-              placeholder="MM/YY"
-              autocomplete="cc-exp"
-              required
-            />
-            <input
-              id="cardCvc"
-              class="input"
-              type="text"
-              inputmode="numeric"
-              placeholder="CVC"
-              autocomplete="cc-csc"
-              required
-            />
+            <input id="buyerPhone" class="input" type="tel" placeholder="ტელეფონი" required />
+            <select id="paymentMethod" class="input">
+              <option value="card">ბარათით გადახდა</option>
+              <option value="transfer">სწრაფი გადარიცხვა</option>
+            </select>
           </div>
-          <button class="primary-btn full" type="submit">გადახდა</button>
+          <button class="primary-btn full" type="submit">1 კლიკით შეძენა</button>
         </form>
 
         <div id="paymentMessage" class="form-message" aria-live="polite"></div>
+        <p class="panel-note">სატესტო რეჟიმში ეს ქმედება ასევე აისახება გაყიდვების პანელში.</p>
       </section>
     </main>
   </div>

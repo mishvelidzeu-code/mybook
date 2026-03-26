@@ -24,10 +24,10 @@
         localStorage.setItem("token", result.token);
         localStorage.setItem("user", JSON.stringify(result.user));
 
-        showMessage(messageBox, "წარმატებით შეხვედი სისტემაში", "success");
+        showMessage(messageBox, "შესვლა წარმატებულია, გადადიხარ პანელში", "success");
 
         setTimeout(() => {
-          window.location.href = "library.html";
+          window.location.href = "admin.html";
         }, 700);
       } catch (error) {
         showMessage(messageBox, error.message || "შესვლა ვერ შესრულდა", "error");
@@ -55,10 +55,12 @@
         };
 
         const result = await Api.register(payload);
-        showMessage(messageBox, result.message || "რეგისტრაცია წარმატებულია", "success");
+        localStorage.setItem("token", result.token);
+        localStorage.setItem("user", JSON.stringify(result.user));
+        showMessage(messageBox, result.message || "რეგისტრაცია დასრულდა", "success");
 
         setTimeout(() => {
-          window.location.href = "login.html";
+          window.location.href = "upload.html";
         }, 800);
       } catch (error) {
         showMessage(messageBox, error.message || "რეგისტრაცია ვერ შესრულდა", "error");

@@ -18,12 +18,20 @@
   const uploadForm = document.getElementById("uploadForm");
   if (!uploadForm) return;
 
+  const user = getCurrentUser();
+  if (user) {
+    const authorInput = document.getElementById("bookAuthor");
+    if (authorInput && !authorInput.value) {
+      authorInput.value = user.name || "";
+    }
+  }
+
   uploadForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const user = getCurrentUser();
-    if (!user || !["author", "admin"].includes(user.role)) {
-      showUploadMessage("ატვირთვისთვის შედი author ან admin ანგარიშით", "error");
+    const currentUser = getCurrentUser();
+    if (!currentUser || !["author", "publisher", "admin"].includes(currentUser.role)) {
+      showUploadMessage("ატვირთვისთვის ჯერ დარეგისტრირდი ან შედი ავტორის ანგარიშით", "error");
       return;
     }
 
@@ -31,7 +39,7 @@
     const coverFile = document.getElementById("coverFile").files[0];
 
     if (!ebookFile || !coverFile) {
-      showUploadMessage("გთხოვ ატვირთო წიგნის ფაილი და ყდა", "error");
+      showUploadMessage("გთხოვ ატვირთო ძირითადი ფაილი და ყდა", "error");
       return;
     }
 
@@ -42,7 +50,9 @@
       const payload = {
         title: document.getElementById("bookTitle").value.trim(),
         author: document.getElementById("bookAuthor").value.trim(),
+        type: document.getElementById("bookType").value,
         genre: document.getElementById("bookGenre").value,
+        details: document.getElementById("bookDetails").value.trim(),
         price: document.getElementById("bookPrice").value,
         description: document.getElementById("bookDescription").value.trim(),
         ebook: ebookFile,
@@ -50,8 +60,12 @@
       };
 
       const result = await Api.uploadBook(payload);
-      showUploadMessage(result.message || "წიგნი წარმატებით აიტვირთა", "success");
+      showUploadMessage(result.message || "ატვირთვა წარმატებულია", "success");
       uploadForm.reset();
+
+      if (user?.name) {
+        document.getElementById("bookAuthor").value = user.name;
+      }
     } catch (error) {
       showUploadMessage(error.message || "ატვირთვა ვერ შესრულდა", "error");
     } finally {

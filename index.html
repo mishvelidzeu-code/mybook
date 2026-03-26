@@ -3,71 +3,135 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#06070a" />
+  <meta name="theme-color" content="#edf5ff" />
   <meta
     name="description"
-    content="NoirLeaf is a luxury mobile-first ebook marketplace for premium digital publishing."
+    content="ლურჯი თარო არის მყიდველზე მორგებული ქართული ციფრული ბიბლიოთეკა ელწიგნებითა და აუდიოწიგნებით."
   />
-  <title>NoirLeaf — Luxury Ebook Platform</title>
+  <title>ლურჯი თარო — მთავარი ბიბლიოთეკა</title>
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body>
   <div class="app-shell">
-    <header class="topbar glass">
-      <div class="brand-wrap">
-        <div class="brand-mark">N</div>
+    <header class="topbar surface">
+      <a class="brand-wrap brand-link" href="index.html" aria-label="ლურჯი თაროს მთავარი გვერდი">
+        <div class="brand-mark">ლთ</div>
         <div>
-          <h1>NoirLeaf</h1>
-          <p>Premium mobile-first ebook marketplace</p>
+          <h1>ლურჯი თარო</h1>
+          <p>ქართული ციფრული ბიბლიოთეკა</p>
         </div>
-      </div>
-      <nav class="top-actions" aria-label="Primary">
-        <a class="ghost-btn" href="login.html">Login</a>
-        <a class="primary-btn" href="register.html">Register</a>
+      </a>
+
+      <nav class="top-actions" aria-label="მოქმედებები">
+        <a class="ghost-btn" href="library.html">ყველა წიგნი</a>
+        <a class="ghost-btn" href="login.html">პანელი</a>
+        <a class="primary-btn" href="register.html">ატვირთვა</a>
       </nav>
     </header>
 
-    <main class="hero-page">
-      <section class="hero-card glass">
+    <main class="storefront">
+      <section class="hero-card surface">
         <div class="hero-copy">
-          <span class="eyebrow">Dark Luxury • Next Gen Publishing</span>
-          <h2>ატვირთე, გაყიდე და მართე ელწიგნები პროფესიონალურად</h2>
+          <span class="eyebrow">მყიდველისთვის მზად • შესვლა არ არის საჭირო</span>
+          <h2>გახსნისთანავე შეხვდი ბიბლიოთეკას და იყიდე წიგნი 1 კლიკით</h2>
           <p>
-            ავტორებისთვის, გამომცემლებისთვის და ციფრული პროდუქტების შემქმნელებისთვის.
-            პრემიუმ ვიზუალი, სწრაფი მობილური გამოცდილება და მზა სტრუქტურა რეალური backend-ის მისაბმელად.
+            საიტი პირველივე წამიდან მორგებულია მკითხველზე: მოძებნე სათაური, ნახე ახალი დამატებულები,
+            მოუსმინე აუდიოწიგნებს და შეიძინე ავტორიზაციის გარეშე. ავტორის მხარე მუშაობს მხოლოდ პანელიდან.
           </p>
         </div>
 
         <div class="hero-actions">
-          <a class="primary-btn" href="library.html">ბიბლიოთეკაში შესვლა</a>
-          <a class="ghost-btn" href="upload.html">წიგნის ატვირთვა</a>
+          <a class="primary-btn" href="library.html">სრული ბიბლიოთეკა</a>
+          <a class="ghost-btn" href="#searchSection">ძებნით ნახვა</a>
         </div>
 
-        <div class="hero-feature-strip">
-          <div class="feature-pill">
-            <strong>Demo Mode</strong>
-            <span>mock data + fast testing</span>
-          </div>
-          <div class="feature-pill">
-            <strong>Backend Ready</strong>
-            <span>API and payment hooks</span>
-          </div>
+        <div class="feature-strip">
+          <article class="feature-pill">
+            <strong>ელწიგნები</strong>
+            <span>მყისიერი ჩამოტვირთვა</span>
+          </article>
+          <article class="feature-pill">
+            <strong>აუდიო წიგნები</strong>
+            <span>მოსასმენი ნებისმიერ დროს</span>
+          </article>
+          <article class="feature-pill">
+            <strong>1 კლიკით ყიდვა</strong>
+            <span>შესვლა საჭირო არ არის</span>
+          </article>
         </div>
       </section>
 
-      <section class="stats-grid">
-        <article class="stat-card glass">
-          <strong>Secure Auth</strong>
-          <span>Login / Register UI ready</span>
-        </article>
-        <article class="stat-card glass">
-          <strong>Admin Panel</strong>
-          <span>Users, books, sales</span>
-        </article>
-        <article class="stat-card glass">
-          <strong>Payments</strong>
-          <span>Checkout structure ready</span>
-        </article>
+      <section id="searchSection" class="panel surface">
+        <div class="section-head">
+          <h2>ძებნით</h2>
+          <span>იპოვე წიგნი სათაურით, ავტორით, ჟანრით ან ფორმატით</span>
+        </div>
+
+        <div class="toolbar-grid toolbar-grid--triple">
+          <input id="searchBooks" class="input" type="search" placeholder="მოძებნე წიგნი ან ავტორი..." />
+          <select id="filterFormat" class="input">
+            <option value="all">ყველა ფორმატი</option>
+            <option value="ebook">ელექტრონული წიგნები</option>
+            <option value="audio">აუდიო წიგნები</option>
+          </select>
+          <select id="filterGenre" class="input">
+            <option value="all">ყველა ჟანრი</option>
+            <option value="ბიზნესი">ბიზნესი</option>
+            <option value="მოტივაცია">მოტივაცია</option>
+            <option value="ფსიქოლოგია">ფსიქოლოგია</option>
+            <option value="რომანი">რომანი</option>
+            <option value="თვითგანვითარება">თვითგანვითარება</option>
+          </select>
+        </div>
+
+        <p id="searchHint" class="panel-note">ძებნის შედეგები აქ გამოჩნდება.</p>
+        <div id="searchResultsGrid" class="book-grid"></div>
+      </section>
+
+      <section class="panel surface">
+        <div class="section-head with-link">
+          <div>
+            <h2>ელექტრონული წიგნები</h2>
+            <span>სწრაფი კითხვებისთვის და მყისიერი ჩამოტვირთვისთვის</span>
+          </div>
+          <a class="mini-link" href="library.html?format=ebook">ყველას ნახვა</a>
+        </div>
+        <div id="ebookBooksGrid" class="book-grid"></div>
+      </section>
+
+      <section class="panel surface">
+        <div class="section-head with-link">
+          <div>
+            <h2>აუდიო წიგნები</h2>
+            <span>მოსასმენად გზაში, სპორტზე ან მუშაობისას</span>
+          </div>
+          <a class="mini-link" href="library.html?format=audio">ყველას ნახვა</a>
+        </div>
+        <div id="audioBooksGrid" class="book-grid"></div>
+      </section>
+
+      <section class="panel surface" id="topBooksSection">
+        <div class="section-head">
+          <h2>თვის ტოპ წიგნები</h2>
+          <span>ყველაზე მოთხოვნადი და რეკომენდებული გამოცემები</span>
+        </div>
+        <div id="topBooksGrid" class="book-grid"></div>
+      </section>
+
+      <section class="panel surface">
+        <div class="section-head">
+          <h2>ავტორების მიხედვით</h2>
+          <span>დაალაგე კატალოგი იმ ავტორით, ვინც უკვე მოგწონს</span>
+        </div>
+        <div id="authorsGrid" class="author-grid"></div>
+      </section>
+
+      <section class="panel surface">
+        <div class="section-head">
+          <h2>ახალი დამატებულები</h2>
+          <span>ახლად ატვირთული წიგნები და აუდიოწიგნები</span>
+        </div>
+        <div id="newBooksGrid" class="book-grid"></div>
       </section>
     </main>
   </div>

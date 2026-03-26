@@ -3,44 +3,53 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#06070a" />
-  <title>Library — NoirLeaf</title>
+  <meta name="theme-color" content="#edf5ff" />
+  <title>სრული ბიბლიოთეკა — ლურჯი თარო</title>
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body>
   <div class="app-shell">
-    <header class="topbar glass compact">
-      <div class="brand-wrap">
-        <div class="brand-mark">N</div>
+    <header class="topbar surface compact">
+      <a class="brand-wrap brand-link" href="index.html" aria-label="მთავარ გვერდზე დაბრუნება">
+        <div class="brand-mark">ლთ</div>
         <div>
-          <h1>Library</h1>
-          <p>Premium digital shelf</p>
+          <h1>სრული ბიბლიოთეკა</h1>
+          <p>ელწიგნები და აუდიოწიგნები ერთ სივრცეში</p>
         </div>
-      </div>
+      </a>
 
       <div class="top-actions">
-        <a class="ghost-btn" href="upload.html">Upload</a>
-        <a class="ghost-btn" href="admin.html">Admin</a>
+        <a class="ghost-btn" href="index.html">მთავარი</a>
+        <a class="ghost-btn" href="login.html">პანელი</a>
+        <a class="primary-btn" href="register.html">ატვირთვა</a>
       </div>
     </header>
 
     <main class="content-stack">
-      <section class="glass panel">
+      <section class="panel surface">
         <div class="section-head">
-          <h2>ელწიგნები</h2>
-          <span>ძებნა, კატეგორიები და პრემიუმ ჩვენება</span>
+          <h2>ძებნა და ფილტრი</h2>
+          <span>იპოვე სასურველი წიგნი ფორმატით, ჟანრით ან ავტორით</span>
         </div>
 
-        <div class="toolbar-grid">
-          <input id="searchBooks" class="input" type="search" placeholder="მოძებნე წიგნი..." />
+        <div class="toolbar-grid toolbar-grid--triple">
+          <input id="searchBooks" class="input" type="search" placeholder="სათაური ან ავტორი..." />
+          <select id="filterFormat" class="input">
+            <option value="all">ყველა ფორმატი</option>
+            <option value="ebook">ელექტრონული წიგნები</option>
+            <option value="audio">აუდიო წიგნები</option>
+          </select>
           <select id="filterGenre" class="input">
             <option value="all">ყველა ჟანრი</option>
             <option value="ბიზნესი">ბიზნესი</option>
             <option value="მოტივაცია">მოტივაცია</option>
             <option value="ფსიქოლოგია">ფსიქოლოგია</option>
             <option value="რომანი">რომანი</option>
+            <option value="თვითგანვითარება">თვითგანვითარება</option>
           </select>
         </div>
+
+        <p id="catalogMeta" class="panel-note">ყველა წიგნი გამოჩნდება ქვემოთ.</p>
       </section>
 
       <section id="booksGrid" class="book-grid" aria-live="polite"></section>
