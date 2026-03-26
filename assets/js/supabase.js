@@ -42,6 +42,30 @@
     return JSON.parse(JSON.stringify(value));
   }
 
+  function getForcedBookPrice() {
+    const rawValue = Number(getConfig().FORCED_BOOK_PRICE);
+    return Number.isFinite(rawValue) && rawValue > 0 ? rawValue : null;
+  }
+
+  function resolveBookPrice(value) {
+    const forcedPrice = getForcedBookPrice();
+    if (forcedPrice !== null) {
+      return forcedPrice;
+    }
+
+    const amount = Number(value || 0);
+    return Number.isFinite(amount) ? amount : 0;
+  }
+
+  function applyBookPrice(book) {
+    if (!book) return book;
+
+    return {
+      ...book,
+      price: resolveBookPrice(book.price)
+    };
+  }
+
   function slugify(value) {
     return String(value || "")
       .toLowerCase()
@@ -444,12 +468,12 @@
   ];
 
   function getTempBooks() {
-    return clone(TEMP_BOOKS);
+    return clone(TEMP_BOOKS).map(applyBookPrice);
   }
 
   function getTempBook(id) {
     const match = TEMP_BOOKS.find((book) => book.id === id);
-    return match ? clone(match) : null;
+    return match ? applyBookPrice(clone(match)) : null;
   }
 
   function readTempSales() {
@@ -477,7 +501,7 @@
       bookId: book.id,
       book: book.title,
       buyer: payload.buyerEmail || "guest@example.com",
-      amount: Number(payload.amount || book.price || 0),
+      amount: resolveBookPrice(payload.amount || book.price),
       createdAt: new Date().toISOString()
     };
 
@@ -496,7 +520,7 @@
   }
 
   function mapBookRow(row) {
-    return {
+    return applyBookPrice({
       id: row.id,
       title: row.title,
       author: row.author,
@@ -515,7 +539,7 @@
       filePath: row.file_path || "",
       createdAt: row.created_at,
       updatedAt: row.updated_at
-    };
+    });
   }
 
   function mapSaleRow(row) {

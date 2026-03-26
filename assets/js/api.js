@@ -230,6 +230,31 @@
     return Boolean(value);
   }
 
+  function getForcedBookPrice() {
+    const rawValue = window.APP_CONFIG?.FORCED_BOOK_PRICE;
+    const amount = Number(rawValue);
+    return Number.isFinite(amount) && amount > 0 ? amount : null;
+  }
+
+  function resolveBookPrice(value) {
+    const forcedPrice = getForcedBookPrice();
+    if (forcedPrice !== null) {
+      return forcedPrice;
+    }
+
+    const amount = Number(value || 0);
+    return Number.isFinite(amount) ? amount : 0;
+  }
+
+  function applyBookPrice(book) {
+    if (!book) return book;
+
+    return {
+      ...book,
+      price: resolveBookPrice(book.price)
+    };
+  }
+
   function normalizeBook(book, users) {
     const matchedUser = users.find((user) => user.name === book.author);
     const type = book.type === "audio" ? "audio" : "ebook";
@@ -242,7 +267,7 @@
       genre: String(book.genre || "").trim(),
       type,
       details: String(book.details || (type === "audio" ? "MP3" : "PDF / EPUB")).trim(),
-      price: Number(book.price || 0),
+      price: resolveBookPrice(book.price),
       description: String(book.description || "").trim(),
       topPick: Boolean(book.topPick),
       ageRestricted: Boolean(book.ageRestricted),
@@ -603,7 +628,7 @@
           bookId: book.id,
           book: book.title,
           buyer: buyerEmail,
-          amount: Number(payload.amount) || Number(book.price) || 0,
+          amount: resolveBookPrice(payload.amount || book.price),
           createdAt: new Date().toISOString()
         };
 
@@ -755,7 +780,13 @@
         return supabaseMethod();
       }
 
-      return this.request("/books");
+      return this.request("/books").then((books) => {
+        if (!Array.isArray(books)) {
+          return [];
+        }
+
+        return books.map(applyBookPrice);
+      });
     },
 
     getMyBooks() {
@@ -764,7 +795,13 @@
         return supabaseMethod();
       }
 
-      return this.request("/books/mine");
+      return this.request("/books/mine").then((books) => {
+        if (!Array.isArray(books)) {
+          return [];
+        }
+
+        return books.map(applyBookPrice);
+      });
     },
 
     getBook(id) {
@@ -773,7 +810,7 @@
         return supabaseMethod(id);
       }
 
-      return this.request(`/books/${encodeURIComponent(id)}`);
+      return this.request(`/books/${encodeURIComponent(id)}`).then((book) => applyBookPrice(book));
     },
 
     uploadBook(payload) {
@@ -839,7 +876,33 @@
       return this.request("/admin/sales");
     },
 
-    createPaymentIntent(payload) {
+    async createPaymentIntent(payload) {
+      const paymentProvider = window.APP_CONFIG?.PAYMENT_PROVIDER || "";
+      const bogEndpoint = window.APP_CONFIG?.BOG_ORDER_ENDPOINT || "/api/book-order";
+
+      if (!window.APP_CONFIG?.DEMO_MODE && paymentProvider === "bog") {
+        const response = await fetch(bogEndpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          let errorMessage = "BOG გადახდის დაწყება ვერ შესრულდა";
+
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.error || errorData.message || errorMessage;
+          } catch (error) {
+            errorMessage = response.statusText || errorMessage;
+          }
+
+          throw new Error(errorMessage);
+        }
+
+        return response.json();
+      }
+
       const supabaseMethod = this.getSupabaseMethod("createPaymentIntent");
       if (supabaseMethod) {
         return supabaseMethod(payload);
@@ -850,6 +913,39 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
+    },
+
+    async getPaymentStatus(orderId) {
+      if (!orderId) {
+        throw new Error("შეკვეთის ნომერი არ არის გადმოცემული");
+      }
+
+      const paymentProvider = window.APP_CONFIG?.PAYMENT_PROVIDER || "";
+      const statusEndpoint = window.APP_CONFIG?.BOG_STATUS_ENDPOINT || "/api/book-order-status";
+
+      if (!window.APP_CONFIG?.DEMO_MODE && paymentProvider === "bog") {
+        const response = await fetch(`${statusEndpoint}?order_id=${encodeURIComponent(orderId)}`);
+
+        if (!response.ok) {
+          let errorMessage = "შეკვეთის სტატუსი ვერ მოიძებნა";
+
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.error || errorData.message || errorMessage;
+          } catch (error) {
+            errorMessage = response.statusText || errorMessage;
+          }
+
+          throw new Error(errorMessage);
+        }
+
+        return response.json();
+      }
+
+      return {
+        orderId,
+        status: "pending"
+      };
     }
   };
 

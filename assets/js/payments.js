@@ -81,7 +81,8 @@
 
       savePurchaseSummary({
         saleId: result.saleId || "",
-        status: result.status || "recorded",
+        orderId: result.orderId || "",
+        status: result.status || "pending",
         deliveryMode: result.deliveryMode || "manual",
         isDemo: Boolean(result.isDemo),
         bookId: currentBook.id,
@@ -91,14 +92,24 @@
         buyerEmail,
         buyerPhone,
         paymentMethod,
-        message: result.message || "შეძენა წარმატებით დაფიქსირდა",
+        message: result.message || "შეკვეთა ჩაიწერა და მზად არის გადახდისთვის",
         createdAt: new Date().toISOString()
       });
 
-      showPaymentMessage(result.message || "შეძენა წარმატებით დასრულდა", "success");
+      showPaymentMessage(result.message || "გადაგიყვანთ BOG გადახდის გვერდზე", "success");
+
+      if (result.redirect) {
+        setTimeout(() => {
+          window.location.href = result.redirect;
+        }, 450);
+        return;
+      }
 
       setTimeout(() => {
-        window.location.href = "success.html";
+        const successUrl = result.orderId
+          ? `success.html?order_id=${encodeURIComponent(result.orderId)}`
+          : "success.html";
+        window.location.href = successUrl;
       }, 500);
     } catch (error) {
       showPaymentMessage(error.message || "შეძენა ვერ შესრულდა", "error");

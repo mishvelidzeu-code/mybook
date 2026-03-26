@@ -1,5 +1,11 @@
 (function () {
   const LAST_PURCHASE_KEY = "lurji-taro-last-purchase";
+  const MAX_STATUS_POLLS = 8;
+  const STATUS_POLL_DELAY = 1500;
+
+  function query(name) {
+    return new URLSearchParams(window.location.search).get(name);
+  }
 
   function formatPrice(value) {
     const amount = Number(value);
@@ -20,11 +26,69 @@
     });
   }
 
+  function readStoredPurchase() {
+    try {
+      return JSON.parse(sessionStorage.getItem(LAST_PURCHASE_KEY) || "null");
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function saveStoredPurchase(purchase) {
+    sessionStorage.setItem(LAST_PURCHASE_KEY, JSON.stringify(purchase));
+  }
+
+  function getStatusPresentation(status) {
+    switch (status) {
+      case "delivered":
+        return {
+          chipClass: "status-chip",
+          chipLabel: "წიგნი გამოგზავნილია",
+          headline: "გადახდა დადასტურდა და ბმული გაიგზავნა ელფოსტაზე",
+          nextStep: "შეამოწმე ელფოსტა და spam საქაღალდე. ჩამოსატვირთი ბმული დროებით მოქმედებს."
+        };
+      case "paid":
+        return {
+          chipClass: "status-chip",
+          chipLabel: "გადახდა დადასტურდა",
+          headline: "შეკვეთა დადასტურდა",
+          nextStep: "ელფოსტის გაგზავნა ან წიგნის მიწოდება იწყება. თუ წერილი მალე არ მოვიდა, მოგვწერე შეკვეთის ნომრით."
+        };
+      case "failed":
+        return {
+          chipClass: "status-chip status-chip--error",
+          chipLabel: "გადახდა ვერ დადასტურდა",
+          headline: "შეკვეთა დასრულებული არ არის",
+          nextStep: "თუ თანხა ჩამოგეჭრა, მოგვწერე ამ შეკვეთის ნომრით. სხვა შემთხვევაში შეგიძლია ხელახლა სცადო გადახდა."
+        };
+      default:
+        return {
+          chipClass: "status-chip status-chip--pending",
+          chipLabel: "ვადასტურებთ გადახდას",
+          headline: "ბანკიდან პასუხს ველოდებით",
+          nextStep: "BOG redirect დასრულდა. რამდენიმე წამში callback განაახლებს სტატუსს და ელფოსტაც ამის შემდეგ გაიგზავნება."
+        };
+    }
+  }
+
+  function formatStatusLabel(status) {
+    switch (status) {
+      case "delivered":
+        return "გაგზავნილია";
+      case "paid":
+        return "გადახდილია";
+      case "failed":
+        return "ვერ დასრულდა";
+      default:
+        return "მოლოდინშია";
+    }
+  }
+
   function renderEmptyState(container) {
     container.innerHTML = `
       <article class="empty-state">
         <strong>ბოლო შეკვეთა ვერ მოიძებნა</strong>
-        <p>თუ ახლახან გადაიხადე, სცადე კიდევ ერთხელ დაბრუნდე შეძენის გვერდიდან.</p>
+        <p>თუ ახლახან გადაიხადე, დაბრუნდი რამდენიმე წამში ან ხელახლა შედი შეძენის გვერდიდან.</p>
         <div class="button-row">
           <a class="primary-btn" href="library.html">წიგნების ნახვა</a>
           <a class="ghost-btn" href="index.html">მთავარი</a>
@@ -34,20 +98,15 @@
   }
 
   function renderSuccess(container, purchase) {
-    const orderLabel = purchase.saleId ? `#${purchase.saleId}` : "დროებითი შეკვეთა";
-    const statusCopy = purchase.isDemo
-      ? "ეს სატესტო შეძენაა. რეალური თანხა არ ჩამოჭრილა."
-      : "შეკვეთა ჩაიწერა. ახლა შემდეგ ეტაპზე უნდა მივაბათ ავტომატური ელფოსტა და download link.";
-
-    const nextStepCopy = purchase.isDemo
-      ? "ტესტისთვის ჩანაწერი შენახულია და გაყიდვებშიც გამოჩნდება."
-      : "როცა email function და gateway webhook დაემატება, მყიდველი აქვე ნახავს რომ ბმული ელფოსტაზე გაიგზავნა.";
+    const normalizedStatus = purchase.status || "pending";
+    const statusView = getStatusPresentation(normalizedStatus);
+    const orderLabel = purchase.orderId || purchase.saleId || "ჯერ არ მოიძებნა";
 
     container.innerHTML = `
       <div class="success-header">
-        <span class="status-chip">შეკვეთა წარმატებულია</span>
+        <span class="${statusView.chipClass}">${escapeHTML(statusView.chipLabel)}</span>
         <h2>${escapeHTML(purchase.bookTitle || "შეკვეთა")}</h2>
-        <p>${escapeHTML(purchase.message || "შეძენა წარმატებით დაფიქსირდა")}</p>
+        <p>${escapeHTML(statusView.headline)}</p>
       </div>
 
       <div class="info-grid">
@@ -56,28 +115,27 @@
           <p>${escapeHTML(orderLabel)}</p>
         </div>
         <div class="detail-card">
-          <strong>გადახდილი თანხა</strong>
+          <strong>თანხა</strong>
           <p>${escapeHTML(formatPrice(purchase.amount))}</p>
         </div>
         <div class="detail-card">
-          <strong>მიმღები ელფოსტა</strong>
+          <strong>ელფოსტა</strong>
           <p>${escapeHTML(purchase.buyerEmail || "-")}</p>
         </div>
         <div class="detail-card">
-          <strong>გადახდის მეთოდი</strong>
-          <p>${escapeHTML(purchase.paymentMethod || "-")}</p>
+          <strong>სტატუსი</strong>
+          <p>${escapeHTML(formatStatusLabel(normalizedStatus))}</p>
         </div>
       </div>
 
       <div class="success-note">
         <strong>რა ხდება ახლა?</strong>
-        <p>${escapeHTML(statusCopy)}</p>
-        <p>${escapeHTML(nextStepCopy)}</p>
+        <p>${escapeHTML(statusView.nextStep)}</p>
       </div>
 
       <div class="success-note">
-        <strong>რას ნიშნავს ეს გვერდი?</strong>
-        <p>success page არის გვერდი, რომელსაც მომხმარებელი ხედავს გადახდის დასრულებისთანავე. აქ უნდა გამოჩნდეს შეკვეთის ნომერი, სტატუსი და შემდეგი ნაბიჯი.</p>
+        <strong>თუ წიგნი არ მოგივიდა</strong>
+        <p>მოგვწერე შეკვეთის ნომერი და ელფოსტა, რომლითაც იყიდე. ამ ორი ინფორმაციით გაყიდვის ჩანაწერს სწრაფად ვიპოვით.</p>
       </div>
 
       <div class="button-row">
@@ -87,21 +145,69 @@
     `;
   }
 
+  function mergePurchase(storedPurchase, remoteStatus, orderIdFromQuery) {
+    return {
+      ...(storedPurchase || {}),
+      ...(remoteStatus || {}),
+      orderId: remoteStatus?.orderId || storedPurchase?.orderId || orderIdFromQuery || "",
+      saleId: remoteStatus?.saleId || storedPurchase?.saleId || "",
+      status: remoteStatus?.status || storedPurchase?.status || "pending",
+      bookTitle: remoteStatus?.bookTitle || storedPurchase?.bookTitle || "შეკვეთა",
+      amount: remoteStatus?.amount || storedPurchase?.amount || 0,
+      buyerEmail: remoteStatus?.buyerEmail || storedPurchase?.buyerEmail || "",
+      buyerName: remoteStatus?.buyerName || storedPurchase?.buyerName || ""
+    };
+  }
+
+  async function fetchPaymentStatus(orderId) {
+    const statusEndpoint = window.APP_CONFIG?.BOG_STATUS_ENDPOINT || "/api/book-order-status";
+    const response = await fetch(`${statusEndpoint}?order_id=${encodeURIComponent(orderId)}`);
+
+    if (!response.ok) {
+      throw new Error("შეკვეთის სტატუსი ვერ მოიძებნა");
+    }
+
+    return response.json();
+  }
+
+  async function hydrateStatus(container, purchase, attempt = 0) {
+    const orderId = purchase.orderId;
+    if (!orderId) {
+      renderSuccess(container, purchase);
+      return;
+    }
+
+    try {
+      const remoteStatus = await fetchPaymentStatus(orderId);
+      const mergedPurchase = mergePurchase(purchase, remoteStatus, orderId);
+      saveStoredPurchase(mergedPurchase);
+      renderSuccess(container, mergedPurchase);
+
+      if (mergedPurchase.status === "pending" && attempt < MAX_STATUS_POLLS) {
+        setTimeout(() => {
+          hydrateStatus(container, mergedPurchase, attempt + 1);
+        }, STATUS_POLL_DELAY);
+      }
+    } catch (error) {
+      renderSuccess(container, purchase);
+    }
+  }
+
   function init() {
     const container = document.getElementById("successCard");
     if (!container) return;
 
-    try {
-      const purchase = JSON.parse(sessionStorage.getItem(LAST_PURCHASE_KEY) || "null");
-      if (!purchase) {
-        renderEmptyState(container);
-        return;
-      }
+    const storedPurchase = readStoredPurchase();
+    const orderIdFromQuery = query("order_id");
 
-      renderSuccess(container, purchase);
-    } catch (error) {
+    if (!storedPurchase && !orderIdFromQuery) {
       renderEmptyState(container);
+      return;
     }
+
+    const initialPurchase = mergePurchase(storedPurchase, null, orderIdFromQuery);
+    renderSuccess(container, initialPurchase);
+    hydrateStatus(container, initialPurchase);
   }
 
   if (document.readyState === "loading") {

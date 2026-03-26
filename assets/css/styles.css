@@ -930,6 +930,18 @@ textarea {
   font-size: 0.82rem;
 }
 
+.status-chip--pending {
+  background: rgba(211, 152, 40, 0.12);
+  color: #9a6500;
+  border-color: rgba(211, 152, 40, 0.22);
+}
+
+.status-chip--error {
+  background: rgba(203, 68, 68, 0.12);
+  color: #a83f3f;
+  border-color: rgba(203, 68, 68, 0.22);
+}
+
 .success-note {
   padding: 16px;
   border-radius: 18px;
