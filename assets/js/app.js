@@ -149,6 +149,127 @@
     });
   }
 
+  function resolvePublicCoverUrl(path) {
+    if (!path) return "";
+
+    const bucket = window.APP_CONFIG?.SUPABASE_COVERS_BUCKET;
+    const client = window.SupabaseService?.getClient?.();
+    if (!bucket || !client) return "";
+
+    try {
+      const { data } = client.storage.from(bucket).getPublicUrl(path);
+      return data?.publicUrl || "";
+    } catch (error) {
+      return "";
+    }
+  }
+
+  function normalizeViewBook(book) {
+    if (!book) return null;
+
+    const type = book.type === "audio" ? "audio" : "ebook";
+    const details = String(book.details || (type === "audio" ? "MP3" : "PDF / EPUB")).trim();
+    const coverPath = book.coverPath || book.cover_path || "";
+
+    return {
+      id: String(book.id || ""),
+      title: String(book.title || "").trim(),
+      author: String(book.author || "").trim(),
+      genre: String(book.genre || "").trim(),
+      type,
+      details,
+      price: Number(book.price || 0),
+      description: String(book.description || "").trim(),
+      topPick: Boolean(book.topPick ?? book.top_pick),
+      ageRestricted: Boolean(book.ageRestricted ?? book.age_restricted),
+      uploaderId: book.uploaderId || book.uploader_id || "",
+      filePath: book.filePath || book.file_path || "",
+      coverPath,
+      coverUrl: book.coverUrl || resolvePublicCoverUrl(coverPath),
+      createdAt: book.createdAt || book.created_at || new Date().toISOString(),
+      updatedAt: book.updatedAt || book.updated_at || book.createdAt || book.created_at || new Date().toISOString()
+    };
+  }
+
+  async function fetchBooksFromSupabaseRest() {
+    const config = window.APP_CONFIG || {};
+    if (!config.SUPABASE_URL || !config.SUPABASE_ANON_KEY) {
+      return [];
+    }
+
+    const response = await fetch(
+      `${config.SUPABASE_URL}/rest/v1/books?select=*&order=created_at.desc`,
+      {
+        headers: {
+          apikey: config.SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${config.SUPABASE_ANON_KEY}`
+        }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Supabase REST ${response.status}`);
+    }
+
+    const rows = await response.json();
+    return Array.isArray(rows) ? rows.map(normalizeViewBook).filter(Boolean) : [];
+  }
+
+  async function fetchBookFromSupabaseRest(id) {
+    const config = window.APP_CONFIG || {};
+    if (!config.SUPABASE_URL || !config.SUPABASE_ANON_KEY || !id) {
+      return null;
+    }
+
+    const response = await fetch(
+      `${config.SUPABASE_URL}/rest/v1/books?id=eq.${encodeURIComponent(id)}&select=*`,
+      {
+        headers: {
+          apikey: config.SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${config.SUPABASE_ANON_KEY}`
+        }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Supabase REST ${response.status}`);
+    }
+
+    const rows = await response.json();
+    return Array.isArray(rows) && rows.length ? normalizeViewBook(rows[0]) : null;
+  }
+
+  async function loadBooksForView() {
+    try {
+      const books = await Api.getBooks();
+      if (Array.isArray(books) && books.length) {
+        return books.map(normalizeViewBook).filter(Boolean);
+      }
+    } catch (error) {
+      // Fall through to direct REST fetch.
+    }
+
+    return fetchBooksFromSupabaseRest();
+  }
+
+  async function loadBookForView(id) {
+    if (!id) {
+      const books = await loadBooksForView();
+      return books[0] || null;
+    }
+
+    try {
+      const book = await Api.getBook(id);
+      if (book) {
+        return normalizeViewBook(book);
+      }
+    } catch (error) {
+      // Fall through to direct REST fetch.
+    }
+
+    return fetchBookFromSupabaseRest(id);
+  }
+
   function renderSectionGrid(container, books, emptyTitle, emptyDescription) {
     if (!container) return;
 
@@ -207,7 +328,7 @@
     renderLoadingState(newBooksGrid, "ახალი დამატებულები იტვირთება...");
 
     try {
-      const books = await Api.getBooks();
+      const books = await loadBooksForView();
       const newestBooks = [...books].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       const topBooks = books.filter((book) => book.topPick);
 
@@ -289,7 +410,7 @@
     renderLoadingState(booksGrid, "სრული ბიბლიოთეკა იტვირთება...");
 
     try {
-      const books = await Api.getBooks();
+      const books = await loadBooksForView();
       const queryAuthor = query("author");
       const queryFormat = query("format");
       const queryGenre = query("genre");
@@ -339,8 +460,8 @@
     renderLoadingState(container, "წიგნის დეტალი იტვირთება...");
 
     try {
-      const id = query("id") || "b1";
-      const book = await Api.getBook(id);
+      const id = query("id");
+      const book = await loadBookForView(id);
 
       if (!book) {
         renderEmptyState(container, "წიგნი ვერ მოიძებნა", "აირჩიე სხვა წიგნი ბიბლიოთეკიდან.");
