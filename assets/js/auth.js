@@ -21,8 +21,12 @@
         };
 
         const result = await Api.login(payload);
-        localStorage.setItem("token", result.token);
-        localStorage.setItem("user", JSON.stringify(result.user));
+        if (result.token) {
+          localStorage.setItem("token", result.token);
+        }
+        if (result.user) {
+          localStorage.setItem("user", JSON.stringify(result.user));
+        }
 
         showMessage(messageBox, "შესვლა წარმატებულია, გადადიხარ პანელში", "success");
 
@@ -55,12 +59,25 @@
         };
 
         const result = await Api.register(payload);
-        localStorage.setItem("token", result.token);
-        localStorage.setItem("user", JSON.stringify(result.user));
         showMessage(messageBox, result.message || "რეგისტრაცია დასრულდა", "success");
 
+        if (result.requiresEmailConfirmation) {
+          setTimeout(() => {
+            window.location.href = "login.html";
+          }, 1200);
+          return;
+        }
+
+        if (result.token) {
+          localStorage.setItem("token", result.token);
+        }
+
+        if (result.user) {
+          localStorage.setItem("user", JSON.stringify(result.user));
+        }
+
         setTimeout(() => {
-          window.location.href = "upload.html";
+          window.location.href = result.user ? "upload.html" : "login.html";
         }, 800);
       } catch (error) {
         showMessage(messageBox, error.message || "რეგისტრაცია ვერ შესრულდა", "error");

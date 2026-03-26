@@ -22,6 +22,7 @@
       <nav class="admin-nav" aria-label="პანელის განყოფილებები">
         <button class="admin-nav-link active" data-admin-tab="dashboard">მიმოხილვა</button>
         <button class="admin-nav-link" data-admin-tab="books">კატალოგი</button>
+        <button class="admin-nav-link" data-admin-tab="my-books">ჩემი წიგნები</button>
         <button class="admin-nav-link" data-admin-tab="users">ავტორები</button>
         <button class="admin-nav-link" data-admin-tab="sales">გაყიდვები</button>
       </nav>
@@ -64,6 +65,76 @@
         <div id="adminBooksList" class="admin-list"></div>
       </section>
 
+      <section id="admin-my-books" class="admin-panel surface hidden">
+        <div class="section-head">
+          <h3>ჩემი წიგნები</h3>
+          <span>აქ ნახავ მხოლოდ შენს მიერ ატვირთულ წიგნებს და შეძლებ ყველაფრის რედაქტირებას</span>
+        </div>
+
+        <div id="myBooksMessage" class="form-message" aria-live="polite"></div>
+        <div id="myBooksList" class="admin-list"></div>
+
+        <div id="editBookPanel" class="edit-panel hidden">
+          <div class="section-head">
+            <h3>წიგნის რედაქტირება</h3>
+            <span>შეგიძლია შეცვალო ყველა დეტალი, მათ შორის ფაილები და +18 მონიშვნა</span>
+          </div>
+
+          <form id="editBookForm" class="stack-form">
+            <input id="editBookId" type="hidden" />
+            <input id="editBookTitle" class="input" type="text" placeholder="წიგნის სათაური" required />
+            <input id="editBookAuthor" class="input" type="text" placeholder="ავტორი" required />
+
+            <div class="grid-2">
+              <select id="editBookType" class="input" required>
+                <option value="ebook">ელექტრონული წიგნი</option>
+                <option value="audio">აუდიო წიგნი</option>
+              </select>
+              <select id="editBookGenre" class="input" required>
+                <option value="ბიზნესი">ბიზნესი</option>
+                <option value="მოტივაცია">მოტივაცია</option>
+                <option value="ფსიქოლოგია">ფსიქოლოგია</option>
+                <option value="რომანი">რომანი</option>
+                <option value="თვითგანვითარება">თვითგანვითარება</option>
+              </select>
+            </div>
+
+            <input id="editBookDetails" class="input" type="text" placeholder="ფორმატი ან ხანგრძლივობა" required />
+            <input id="editBookPrice" class="input" type="number" min="0" step="0.01" placeholder="ფასი" required />
+            <textarea id="editBookDescription" class="input textarea" placeholder="აღწერა" required></textarea>
+
+            <div class="grid-2">
+              <label class="check-field">
+                <input id="editBookAdultsOnly" type="checkbox" />
+                <span>მხოლოდ 18+ მკითხველისთვის</span>
+              </label>
+              <label class="check-field">
+                <input id="editBookTopPick" type="checkbox" />
+                <span>თვის ტოპ წიგნებში გამოჩნდეს</span>
+              </label>
+            </div>
+
+            <div class="grid-2">
+              <label class="upload-field">
+                <span>შეცვალე ძირითადი ფაილი სურვილის შემთხვევაში</span>
+                <input id="editEbookFile" type="file" accept=".pdf,.epub,.mobi,.mp3,.zip" />
+              </label>
+              <label class="upload-field">
+                <span>შეცვალე ყდა სურვილის შემთხვევაში</span>
+                <input id="editCoverFile" type="file" accept="image/*" />
+              </label>
+            </div>
+
+            <div id="editBookMeta" class="edit-book-meta"></div>
+
+            <div class="edit-actions">
+              <button class="primary-btn" type="submit">შენახვა</button>
+              <button id="cancelEditBook" class="ghost-btn" type="button">გაუქმება</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
       <section id="admin-users" class="admin-panel surface hidden">
         <div class="section-head">
           <h3>ავტორები</h3>
@@ -82,7 +153,9 @@
     </main>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/config.js"></script>
+  <script src="assets/js/supabase.js"></script>
   <script src="assets/js/api.js"></script>
   <script src="assets/js/app.js"></script>
   <script src="assets/js/admin.js"></script>

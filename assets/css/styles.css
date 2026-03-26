@@ -250,6 +250,33 @@ textarea {
   gap: 16px;
 }
 
+.section-directory {
+  padding: 16px;
+}
+
+.section-links {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.section-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid var(--line);
+  color: var(--title);
+  font-weight: 700;
+}
+
+.section-link span {
+  color: var(--primary);
+  min-width: 1.5rem;
+}
+
 .hero-card,
 .panel {
   padding: 20px;
@@ -407,14 +434,14 @@ textarea {
 
 .book-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
 }
 
 .book-card {
   display: grid;
-  gap: 14px;
-  padding: 16px;
+  gap: 10px;
+  padding: 12px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(240, 247, 255, 0.9));
   border: 1px solid var(--line);
 }
@@ -427,8 +454,8 @@ textarea {
   flex-direction: column;
   justify-content: space-between;
   aspect-ratio: 2 / 3;
-  border-radius: 20px;
-  padding: 16px;
+  border-radius: 16px;
+  padding: 12px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(7, 56, 112, 0.08)),
     linear-gradient(145deg, #dcecff 0%, #9ecaf8 45%, #4d9dff 100%);
@@ -448,6 +475,25 @@ textarea {
   pointer-events: none;
 }
 
+.cover-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cover-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 12px;
+  background: linear-gradient(180deg, rgba(7, 33, 72, 0.08), rgba(7, 33, 72, 0.74));
+}
+
 .cover-top,
 .cover-bottom {
   position: relative;
@@ -462,32 +508,48 @@ textarea {
 .cover-type {
   display: inline-flex;
   width: fit-content;
-  padding: 6px 10px;
+  padding: 5px 8px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.72);
   color: var(--primary-deep);
-  font-size: 0.72rem;
+  font-size: 0.62rem;
   font-weight: 800;
 }
 
 .cover-title {
-  margin-top: 10px;
+  margin-top: 8px;
   color: #0d3158;
   font-family: "Georgia", serif;
-  font-size: clamp(1.25rem, 5vw, 1.7rem);
-  line-height: 1.05;
+  font-size: clamp(0.98rem, 3.7vw, 1.28rem);
+  line-height: 1.08;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .cover-size {
   color: rgba(13, 49, 88, 0.78);
-  font-size: 0.78rem;
+  font-size: 0.7rem;
   font-weight: 700;
 }
 
 .cover-author {
-  margin-top: 6px;
+  margin-top: 4px;
   color: rgba(13, 49, 88, 0.88);
+  font-size: 0.8rem;
   font-weight: 700;
+}
+
+.cover-overlay .cover-type {
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.cover-overlay .cover-title,
+.cover-overlay .cover-size,
+.cover-overlay .cover-author {
+  color: #ffffff;
+  text-shadow: 0 8px 20px rgba(7, 33, 72, 0.48);
 }
 
 .book-cover-large {
@@ -496,7 +558,7 @@ textarea {
 
 .book-meta {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .book-meta h3,
@@ -507,7 +569,12 @@ textarea {
 
 .book-meta p {
   margin: 0;
-  font-size: 0.96rem;
+  font-size: 0.84rem;
+  line-height: 1.42;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .badges {
@@ -517,12 +584,12 @@ textarea {
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 8px 10px;
+  padding: 6px 8px;
   border-radius: 999px;
   background: var(--badge);
   border: 1px solid rgba(34, 105, 196, 0.12);
   color: var(--primary-deep);
-  font-size: 0.78rem;
+  font-size: 0.66rem;
   font-weight: 700;
 }
 
@@ -541,21 +608,30 @@ textarea {
 
 .price-label span {
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.74rem;
 }
 
 .price-label strong {
   color: var(--title);
-  font-size: 1.3rem;
+  font-size: 1.02rem;
 }
 
 .button-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .button-row > * {
   width: 100%;
+}
+
+.button-row .primary-btn,
+.button-row .ghost-btn {
+  min-height: 38px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
 }
 
 .author-grid,
@@ -615,6 +691,30 @@ textarea {
   gap: 8px;
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+.check-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--title);
+  font-weight: 600;
+}
+
+.check-field input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+}
+
+.badge-danger {
+  background: #fff1f1;
+  border-color: rgba(210, 77, 77, 0.18);
+  color: #b13a3a;
 }
 
 .upload-field input[type="file"] {
@@ -713,6 +813,7 @@ textarea {
   }
 
   .grid-2,
+  .section-links,
   .author-grid,
   .feature-strip,
   .info-grid {
@@ -730,7 +831,7 @@ textarea {
   }
 
   .book-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .book-focus {
@@ -741,9 +842,10 @@ textarea {
 
 @media (min-width: 1120px) {
   .book-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
+  .section-links,
   .feature-strip,
   .author-grid,
   .info-grid {
@@ -753,8 +855,7 @@ textarea {
 
 @media (max-width: 520px) {
   .topbar,
-  .hero-actions,
-  .button-row {
+  .hero-actions {
     display: grid;
   }
 
@@ -768,11 +869,16 @@ textarea {
     grid-column: 1 / -1;
   }
 
-  .button-row {
-    grid-template-columns: 1fr;
-  }
-
   .checkout-summary {
     grid-template-columns: 1fr;
   }
+}
+
+.book-card .cover-size,
+.book-card .cover-author {
+  display: none;
+}
+
+.book-card .book-meta h3 {
+  font-size: 1rem;
 }

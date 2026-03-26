@@ -115,6 +115,55 @@
   flex-wrap: wrap;
 }
 
+.admin-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.admin-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  border: 1px solid rgba(34, 105, 196, 0.14);
+  color: var(--primary-deep);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.admin-tag-danger {
+  background: #fff1f1;
+  border-color: rgba(210, 77, 77, 0.16);
+  color: #b13a3a;
+}
+
+.edit-panel {
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 24px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.74);
+}
+
+.edit-book-meta {
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px dashed var(--line-strong);
+  background: rgba(255, 255, 255, 0.68);
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 @media (min-width: 760px) {
   .admin-stats {
     grid-template-columns: repeat(3, minmax(0, 1fr));

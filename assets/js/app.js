@@ -75,9 +75,21 @@
 
   function buildCover(book, large = false) {
     const coverClass = large ? "book-cover-large" : "book-cover";
-
-    return `
-      <div class="${coverClass}">
+    const visual = book.coverUrl
+      ? `
+        <img class="cover-image" src="${escapeHTML(book.coverUrl)}" alt="${escapeHTML(book.title)}" loading="lazy" />
+        <div class="cover-overlay">
+          <div class="cover-top">
+            <span class="cover-type">${escapeHTML(formatTypeLabel(book.type))}</span>
+            <strong class="cover-title">${escapeHTML(book.title)}</strong>
+          </div>
+          <div class="cover-bottom">
+            <div class="cover-size">1000 × 1500</div>
+            <div class="cover-author">${escapeHTML(book.author)}</div>
+          </div>
+        </div>
+      `
+      : `
         <div class="cover-top">
           <span class="cover-type">${escapeHTML(formatTypeLabel(book.type))}</span>
           <strong class="cover-title">${escapeHTML(book.title)}</strong>
@@ -86,6 +98,11 @@
           <div class="cover-size">1000 × 1500</div>
           <div class="cover-author">${escapeHTML(book.author)}</div>
         </div>
+      `;
+
+    return `
+      <div class="${coverClass}">
+        ${visual}
       </div>
     `;
   }
@@ -101,6 +118,7 @@
             <span class="badge">${escapeHTML(book.author)}</span>
             <span class="badge">${escapeHTML(book.genre)}</span>
             <span class="badge">${escapeHTML(book.details)}</span>
+            ${book.ageRestricted ? '<span class="badge badge-danger">18+</span>' : ""}
           </div>
           <div class="price-row">
             <div class="price-label">
@@ -109,8 +127,8 @@
             </div>
           </div>
           <div class="button-row">
-            <a class="ghost-btn" href="book.html?id=${encodeURIComponent(book.id)}">დეტალურად</a>
-            <a class="primary-btn" href="payments.html?id=${encodeURIComponent(book.id)}">1 კლიკით ყიდვა</a>
+            <a class="ghost-btn" href="book.html?id=${encodeURIComponent(book.id)}">ნახვა</a>
+            <a class="primary-btn" href="payments.html?id=${encodeURIComponent(book.id)}">ყიდვა</a>
           </div>
         </div>
       </article>
@@ -342,6 +360,7 @@
               <span class="badge">${escapeHTML(book.author)}</span>
               <span class="badge">${escapeHTML(book.genre)}</span>
               <span class="badge">${escapeHTML(book.details)}</span>
+              ${book.ageRestricted ? '<span class="badge badge-danger">18+</span>' : ""}
             </div>
 
             <div class="info-grid">
@@ -356,6 +375,10 @@
               <div class="detail-card">
                 <strong>ყდის პროპორცია</strong>
                 <p>1000 × 1500 სიმეტრიული გამოსატანად</p>
+              </div>
+              <div class="detail-card">
+                <strong>ასაკობრივი მონიშვნა</strong>
+                <p>${book.ageRestricted ? "მხოლოდ 18+ მკითხველისთვის" : "შეზღუდვის გარეშე"}</p>
               </div>
             </div>
 

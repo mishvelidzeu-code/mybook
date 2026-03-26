@@ -51,6 +51,11 @@
           <input id="bookPrice" class="input" type="number" min="0" step="0.01" placeholder="ფასი" required />
           <textarea id="bookDescription" class="input textarea" placeholder="მოკლე აღწერა" required></textarea>
 
+          <label class="check-field">
+            <input id="bookAdultsOnly" type="checkbox" />
+            <span>მხოლოდ 18+ მკითხველისთვის</span>
+          </label>
+
           <label class="upload-field">
             <span>ატვირთე ძირითადი ფაილი</span>
             <input id="ebookFile" type="file" accept=".pdf,.epub,.mobi,.mp3,.zip" required />
@@ -69,7 +74,9 @@
     </main>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/config.js"></script>
+  <script src="assets/js/supabase.js"></script>
   <script src="assets/js/api.js"></script>
   <script src="assets/js/upload.js"></script>
 </body>

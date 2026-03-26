@@ -30,6 +30,22 @@
     </header>
 
     <main class="storefront">
+      <section class="panel surface section-directory">
+        <div class="section-head">
+          <h2>სექციები</h2>
+          <span>აირჩიე სასურველი ნაწილი და პირდაპირ გადადი მასზე</span>
+        </div>
+
+        <div class="section-links">
+          <a class="section-link" href="#ebooksSection"><span>1.</span> ელექტრონული წიგნები</a>
+          <a class="section-link" href="#audioSection"><span>2.</span> აუდიო წიგნები</a>
+          <a class="section-link" href="#topBooksSection"><span>3.</span> თვის ტოპ წიგნები</a>
+          <a class="section-link" href="#authorsSection"><span>4.</span> ავტორების მიხედვით</a>
+          <a class="section-link" href="#newBooksSection"><span>5.</span> ახალი დამატებულები</a>
+          <a class="section-link" href="#searchSection"><span>6.</span> ძებნით</a>
+        </div>
+      </section>
+
       <section class="hero-card surface">
         <div class="hero-copy">
           <span class="eyebrow">მყიდველისთვის მზად • შესვლა არ არის საჭირო</span>
@@ -63,7 +79,7 @@
 
       <section id="searchSection" class="panel surface">
         <div class="section-head">
-          <h2>ძებნით</h2>
+          <h2>6. ძებნით</h2>
           <span>იპოვე წიგნი სათაურით, ავტორით, ჟანრით ან ფორმატით</span>
         </div>
 
@@ -88,10 +104,10 @@
         <div id="searchResultsGrid" class="book-grid"></div>
       </section>
 
-      <section class="panel surface">
+      <section id="ebooksSection" class="panel surface">
         <div class="section-head with-link">
           <div>
-            <h2>ელექტრონული წიგნები</h2>
+            <h2>1. ელექტრონული წიგნები</h2>
             <span>სწრაფი კითხვებისთვის და მყისიერი ჩამოტვირთვისთვის</span>
           </div>
           <a class="mini-link" href="library.html?format=ebook">ყველას ნახვა</a>
@@ -99,10 +115,10 @@
         <div id="ebookBooksGrid" class="book-grid"></div>
       </section>
 
-      <section class="panel surface">
+      <section id="audioSection" class="panel surface">
         <div class="section-head with-link">
           <div>
-            <h2>აუდიო წიგნები</h2>
+            <h2>2. აუდიო წიგნები</h2>
             <span>მოსასმენად გზაში, სპორტზე ან მუშაობისას</span>
           </div>
           <a class="mini-link" href="library.html?format=audio">ყველას ნახვა</a>
@@ -112,23 +128,23 @@
 
       <section class="panel surface" id="topBooksSection">
         <div class="section-head">
-          <h2>თვის ტოპ წიგნები</h2>
+          <h2>3. თვის ტოპ წიგნები</h2>
           <span>ყველაზე მოთხოვნადი და რეკომენდებული გამოცემები</span>
         </div>
         <div id="topBooksGrid" class="book-grid"></div>
       </section>
 
-      <section class="panel surface">
+      <section id="authorsSection" class="panel surface">
         <div class="section-head">
-          <h2>ავტორების მიხედვით</h2>
+          <h2>4. ავტორების მიხედვით</h2>
           <span>დაალაგე კატალოგი იმ ავტორით, ვინც უკვე მოგწონს</span>
         </div>
         <div id="authorsGrid" class="author-grid"></div>
       </section>
 
-      <section class="panel surface">
+      <section id="newBooksSection" class="panel surface">
         <div class="section-head">
-          <h2>ახალი დამატებულები</h2>
+          <h2>5. ახალი დამატებულები</h2>
           <span>ახლად ატვირთული წიგნები და აუდიოწიგნები</span>
         </div>
         <div id="newBooksGrid" class="book-grid"></div>
@@ -136,7 +152,9 @@
     </main>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/config.js"></script>
+  <script src="assets/js/supabase.js"></script>
   <script src="assets/js/api.js"></script>
   <script src="assets/js/app.js"></script>
 </body>

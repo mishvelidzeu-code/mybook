@@ -55,6 +55,7 @@
         details: document.getElementById("bookDetails").value.trim(),
         price: document.getElementById("bookPrice").value,
         description: document.getElementById("bookDescription").value.trim(),
+        ageRestricted: document.getElementById("bookAdultsOnly").checked,
         ebook: ebookFile,
         cover: coverFile
       };
