@@ -255,6 +255,81 @@
     };
   }
 
+  function resolvePublicCoverUrl(path) {
+    if (!path) return "";
+
+    const bucket = window.APP_CONFIG?.SUPABASE_COVERS_BUCKET;
+    const client = window.SupabaseService?.getClient?.();
+    if (!bucket || !client) return "";
+
+    try {
+      const { data } = client.storage.from(bucket).getPublicUrl(path);
+      return data?.publicUrl || "";
+    } catch (error) {
+      return "";
+    }
+  }
+
+  function normalizeSupabaseBook(book) {
+    if (!book) return null;
+
+    const type = book.type === "audio" ? "audio" : "ebook";
+    const coverPath = String(book.coverPath || book.cover_path || "").trim();
+
+    return applyBookPrice({
+      id: String(book.id || ""),
+      title: String(book.title || "").trim(),
+      author: String(book.author || "").trim(),
+      genre: String(book.genre || "").trim(),
+      type,
+      details: String(book.details || (type === "audio" ? "MP3" : "PDF / EPUB")).trim(),
+      price: Number(book.price || 0),
+      description: String(book.description || "").trim(),
+      topPick: Boolean(book.topPick ?? book.top_pick),
+      ageRestricted: Boolean(book.ageRestricted ?? book.age_restricted),
+      uploaderId: book.uploaderId || book.uploader_id || "",
+      fileName: String(book.fileName || (book.file_path ? String(book.file_path).split("/").pop() : "")),
+      coverName: String(book.coverName || (coverPath ? coverPath.split("/").pop() : "")),
+      filePath: String(book.filePath || book.file_path || ""),
+      coverPath,
+      coverUrl: String(book.coverUrl || resolvePublicCoverUrl(coverPath) || ""),
+      createdAt: book.createdAt || book.created_at || new Date().toISOString(),
+      updatedAt: book.updatedAt || book.updated_at || book.createdAt || book.created_at || new Date().toISOString()
+    });
+  }
+
+  async function requestSupabaseRest(path) {
+    const config = window.APP_CONFIG || {};
+    if (!config.SUPABASE_URL || !config.SUPABASE_ANON_KEY) {
+      throw new Error("Supabase config is missing");
+    }
+
+    const response = await fetch(`${config.SUPABASE_URL}/rest/v1/${path}`, {
+      headers: {
+        apikey: config.SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${config.SUPABASE_ANON_KEY}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Supabase REST ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  async function fetchBooksFromSupabaseRest() {
+    const rows = await requestSupabaseRest("books?select=*&order=created_at.desc");
+    return Array.isArray(rows) ? rows.map(normalizeSupabaseBook).filter(Boolean) : [];
+  }
+
+  async function fetchBookFromSupabaseRest(id) {
+    if (!id) return null;
+
+    const rows = await requestSupabaseRest(`books?id=eq.${encodeURIComponent(id)}&select=*`);
+    return Array.isArray(rows) && rows.length ? normalizeSupabaseBook(rows[0]) : null;
+  }
+
   function normalizeBook(book, users) {
     const matchedUser = users.find((user) => user.name === book.author);
     const type = book.type === "audio" ? "audio" : "ebook";
@@ -774,10 +849,19 @@
       });
     },
 
-    getBooks() {
+    async getBooks() {
       const supabaseMethod = this.getSupabaseMethod("getBooks");
       if (supabaseMethod) {
-        return supabaseMethod();
+        try {
+          const books = await supabaseMethod();
+          if (Array.isArray(books) && books.length) {
+            return books.map(applyBookPrice);
+          }
+        } catch (error) {
+          // Fall through to direct REST request.
+        }
+
+        return fetchBooksFromSupabaseRest();
       }
 
       return this.request("/books").then((books) => {
@@ -804,10 +888,19 @@
       });
     },
 
-    getBook(id) {
+    async getBook(id) {
       const supabaseMethod = this.getSupabaseMethod("getBook");
       if (supabaseMethod) {
-        return supabaseMethod(id);
+        try {
+          const book = await supabaseMethod(id);
+          if (book) {
+            return applyBookPrice(book);
+          }
+        } catch (error) {
+          // Fall through to direct REST request.
+        }
+
+        return fetchBookFromSupabaseRest(id);
       }
 
       return this.request(`/books/${encodeURIComponent(id)}`).then((book) => applyBookPrice(book));
