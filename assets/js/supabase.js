@@ -603,40 +603,17 @@
     const supabase = getClient();
     if (!supabase) return null;
 
-    const { data, error } = await supabase.auth.getUser();
-    if (error) {
-      throw error;
-    }
-
-    if (data.user) {
-      return data.user;
-    }
-
     const session = await getCurrentSession();
     if (session?.user) {
       return session.user;
     }
 
-    const startedAt = Date.now();
-    while (Date.now() - startedAt < 2200) {
-      await sleep(180);
-
-      const latestSession = await getCurrentSession();
-      if (latestSession?.user) {
-        return latestSession.user;
-      }
-
-      const { data: retryData, error: retryError } = await supabase.auth.getUser();
-      if (retryError) {
-        throw retryError;
-      }
-
-      if (retryData.user) {
-        return retryData.user;
-      }
+    const { data, error } = await supabase.auth.getUser();
+    if (error) {
+      throw error;
     }
 
-    return null;
+    return data.user || null;
   }
 
   async function getCurrentSession() {
@@ -680,17 +657,18 @@
     }
 
     if (!data) {
-      try {
-        const ensuredProfile = await ensureProfileRecord(user, session);
-        if (ensuredProfile) {
-          cacheUser(ensuredProfile);
-          return ensuredProfile;
-        }
-      } catch (ensureError) {
-        const fallbackProfile = normalizeProfileRow(null, user);
-        cacheUser(fallbackProfile);
-        return fallbackProfile;
-      }
+      const fallbackProfile = normalizeProfileRow(null, user);
+      cacheUser(fallbackProfile);
+
+      ensureProfileRecord(user, session)
+        .then((ensuredProfile) => {
+          if (ensuredProfile) {
+            cacheUser(ensuredProfile);
+          }
+        })
+        .catch(() => null);
+
+      return fallbackProfile;
     }
 
     const profile = normalizeProfileRow(data, user);
@@ -711,20 +689,14 @@
 
     cacheToken(data.session);
 
-    try {
-      const profile = await getCurrentProfile();
-      return {
-        token: data.session?.access_token || "",
-        user: profile
-      };
-    } catch (profileError) {
-      const fallbackProfile = normalizeProfileRow(null, data.user);
-      cacheUser(fallbackProfile);
-      return {
-        token: data.session?.access_token || "",
-        user: fallbackProfile
-      };
-    }
+    const fallbackProfile = normalizeProfileRow(null, data.user);
+    cacheUser(fallbackProfile);
+    syncSessionUser().catch(() => null);
+
+    return {
+      token: data.session?.access_token || "",
+      user: fallbackProfile
+    };
   }
 
   async function signUp(payload) {
