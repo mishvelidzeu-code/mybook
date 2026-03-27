@@ -53,6 +53,11 @@ module.exports = async function handler(req, res) {
 
     const orderId = createOrderId();
     const siteUrl = getSiteUrl();
+    const callbackUrl = new URL("/api/book-callback", `${siteUrl}/`);
+
+    if (process.env.BOG_CALLBACK_TOKEN) {
+      callbackUrl.searchParams.set("token", process.env.BOG_CALLBACK_TOKEN);
+    }
 
     const { data: insertedSale, error: saleInsertError } = await supabase
       .from("sales")
@@ -86,7 +91,7 @@ module.exports = async function handler(req, res) {
         "Accept-Language": "ka"
       },
       body: JSON.stringify({
-        callback_url: `${siteUrl}/api/book-callback`,
+        callback_url: callbackUrl.toString(),
         external_order_id: orderId,
         purchase_units: {
           currency: "GEL",

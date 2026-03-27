@@ -10,6 +10,20 @@ const {
   createSignedBookUrl
 } = require("./_shared/payments");
 
+function getCallbackToken(req) {
+  const queryToken = String(req.query?.token || "").trim();
+  if (queryToken) {
+    return queryToken;
+  }
+
+  try {
+    const parsedUrl = new URL(req.url, "http://localhost");
+    return String(parsedUrl.searchParams.get("token") || "").trim();
+  } catch (error) {
+    return "";
+  }
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -17,8 +31,12 @@ module.exports = async function handler(req, res) {
 
   try {
     if (process.env.BOG_CALLBACK_TOKEN) {
-      const authHeader = req.headers.authorization;
-      if (authHeader !== `Bearer ${process.env.BOG_CALLBACK_TOKEN}`) {
+      const authHeader = String(req.headers.authorization || "").trim();
+      const queryToken = getCallbackToken(req);
+      const isAuthorized = authHeader === `Bearer ${process.env.BOG_CALLBACK_TOKEN}`
+        || queryToken === process.env.BOG_CALLBACK_TOKEN;
+
+      if (!isAuthorized) {
         return res.status(401).json({ error: "Unauthorized" });
       }
     }
@@ -183,6 +201,8 @@ module.exports = async function handler(req, res) {
       } catch (mailError) {
         console.error("CALLBACK EMAIL ERROR:", mailError);
       }
+    } else {
+      console.warn("CALLBACK EMAIL SKIPPED: mail transporter is not configured");
     }
 
     return res.status(200).json({ received: true });
