@@ -155,6 +155,15 @@ function getAdminNotificationEmail() {
   return process.env.ADMIN_NOTIFICATION_EMAIL || process.env.GMAIL_USER || process.env.SMTP_USER || "";
 }
 
+function getFallbackDownloadUrl() {
+  const explicitUrl = normalizeSiteUrl(process.env.DEFAULT_BOOK_DOWNLOAD_URL || process.env.FALLBACK_BOOK_DOWNLOAD_URL);
+  if (explicitUrl) {
+    return explicitUrl;
+  }
+
+  return `${getSiteUrl()}/assets/files/demo-book.pdf`;
+}
+
 async function createSignedBookUrl(supabase, filePath) {
   if (!filePath) {
     return "";
@@ -188,5 +197,6 @@ module.exports = {
   createMailerTransport,
   getMailerFromAddress,
   getAdminNotificationEmail,
+  getFallbackDownloadUrl,
   createSignedBookUrl
 };

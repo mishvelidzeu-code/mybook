@@ -7,6 +7,7 @@ const {
   createMailerTransport,
   getMailerFromAddress,
   getAdminNotificationEmail,
+  getFallbackDownloadUrl,
   createSignedBookUrl
 } = require("./_shared/payments");
 
@@ -105,12 +106,18 @@ module.exports = async function handler(req, res) {
     }
 
     let signedDownloadUrl = "";
+    let usingFallbackDownload = false;
     if (book?.file_path) {
       try {
         signedDownloadUrl = await createSignedBookUrl(supabase, book.file_path);
       } catch (signedUrlError) {
         console.error("SIGNED URL ERROR:", signedUrlError);
       }
+    }
+
+    if (!signedDownloadUrl) {
+      signedDownloadUrl = getFallbackDownloadUrl();
+      usingFallbackDownload = Boolean(signedDownloadUrl);
     }
 
     const transporter = createMailerTransport();
@@ -174,7 +181,11 @@ module.exports = async function handler(req, res) {
                       წიგნის ჩამოტვირთვა
                     </a>
                   </p>
-                  <p style="font-size:14px;color:#5d7596;">ბმული დროებით მუშაობს. თუ ვადა გაუვიდა, მოგვწერე შეკვეთის ნომრით.</p>
+                  <p style="font-size:14px;color:#5d7596;">
+                    ${usingFallbackDownload
+                      ? "ეს დროებითი სატესტო PDF-ია. რეალურ წიგნის ფაილს მოგვიანებით მივაბამთ."
+                      : "ბმული დროებით მუშაობს. თუ ვადა გაუვიდა, მოგვწერე შეკვეთის ნომრით."}
+                  </p>
                 ` : `
                   <p>ჩამოსატვირთი ბმული ხელით გამოგზავნება ჩვენი გუნდის მხრიდან, რადგან ფაილი ჯერ პირდაპირ მიწოდებისთვის არ არის გამზადებული.</p>
                 `}
