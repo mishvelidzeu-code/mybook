@@ -5,6 +5,26 @@
     return window.AppUtils.getCurrentUser();
   }
 
+  async function resolveCurrentUser() {
+    const cachedUser = getCurrentUser();
+    if (cachedUser) {
+      return cachedUser;
+    }
+
+    if (window.SupabaseService?.isEnabled?.() && typeof window.SupabaseService.syncSessionUser === "function") {
+      try {
+        const syncedUser = await window.SupabaseService.syncSessionUser();
+        if (syncedUser) {
+          return syncedUser;
+        }
+      } catch (error) {
+        return getCurrentUser();
+      }
+    }
+
+    return getCurrentUser();
+  }
+
   function adminTab(tab) {
     document.querySelectorAll(".admin-nav-link").forEach((button) => {
       button.classList.toggle("active", button.dataset.adminTab === tab);
@@ -101,8 +121,7 @@
     document.getElementById("editBookForm")?.reset();
   }
 
-  async function renderAdmin() {
-    const currentUser = getCurrentUser();
+  async function renderAdmin(currentUser = getCurrentUser()) {
     const stats = await Api.getAdminStats();
     const books = await Api.getBooks();
     const users = await Api.getUsers();
@@ -265,7 +284,7 @@
     const navButtons = document.querySelectorAll(".admin-nav-link");
     if (!navButtons.length) return;
 
-    const currentUser = getCurrentUser();
+    const currentUser = await resolveCurrentUser();
     if (!currentUser) {
       const dashboard = document.getElementById("admin-dashboard");
       if (dashboard) {
@@ -290,7 +309,7 @@
     bindEditForm();
 
     try {
-      await renderAdmin();
+      await renderAdmin(currentUser);
     } catch (error) {
       const dashboard = document.getElementById("admin-dashboard");
       if (dashboard) {

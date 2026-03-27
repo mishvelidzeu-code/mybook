@@ -116,6 +116,14 @@
     localStorage.removeItem("token");
   }
 
+  function readCachedUser() {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "null");
+    } catch (error) {
+      return null;
+    }
+  }
+
   function hasRecoveryParams() {
     const locationState = `${window.location.search || ""}${window.location.hash || ""}`;
     return /type=recovery|access_token=|refresh_token=|token_hash=|code=/.test(locationState);
@@ -560,7 +568,35 @@
       throw error;
     }
 
-    return data.user || null;
+    if (data.user) {
+      return data.user;
+    }
+
+    const session = await getCurrentSession();
+    if (session?.user) {
+      return session.user;
+    }
+
+    const startedAt = Date.now();
+    while (Date.now() - startedAt < 2200) {
+      await sleep(180);
+
+      const latestSession = await getCurrentSession();
+      if (latestSession?.user) {
+        return latestSession.user;
+      }
+
+      const { data: retryData, error: retryError } = await supabase.auth.getUser();
+      if (retryError) {
+        throw retryError;
+      }
+
+      if (retryData.user) {
+        return retryData.user;
+      }
+    }
+
+    return null;
   }
 
   async function getCurrentSession() {
@@ -581,6 +617,11 @@
 
     const user = await getCurrentAuthUser();
     if (!user) {
+      const cachedUser = readCachedUser();
+      if (cachedUser) {
+        return cachedUser;
+      }
+
       clearCachedSession();
       return null;
     }

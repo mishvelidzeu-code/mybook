@@ -16,6 +16,18 @@
     return document.getElementById(id)?.value?.trim() || "";
   }
 
+  async function syncSupabaseUser() {
+    if (!window.SupabaseService?.isEnabled?.() || typeof window.SupabaseService.syncSessionUser !== "function") {
+      return null;
+    }
+
+    try {
+      return await window.SupabaseService.syncSessionUser();
+    } catch (error) {
+      return null;
+    }
+  }
+
   const loginForm = document.getElementById("loginForm");
   if (loginForm) {
     loginForm.addEventListener("submit", async (event) => {
@@ -37,6 +49,8 @@
         if (result.user) {
           localStorage.setItem("user", JSON.stringify(result.user));
         }
+
+        await syncSupabaseUser();
 
         showMessage(messageBox, "შესვლა წარმატებულია, გადადიხარ პანელში", "success");
 
@@ -93,8 +107,10 @@
           localStorage.setItem("user", JSON.stringify(result.user));
         }
 
+        await syncSupabaseUser();
+
         setTimeout(() => {
-          window.location.href = result.user ? "upload.html" : "login.html";
+          window.location.href = result.user ? "admin.html" : "login.html";
         }, 800);
       } catch (error) {
         showMessage(messageBox, error.message || "რეგისტრაცია ვერ შესრულდა", "error");
