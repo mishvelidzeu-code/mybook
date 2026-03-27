@@ -2,6 +2,8 @@
   const DEMO_STORE_KEY = "lurji-taro-demo-store";
   const DEMO_RESET_EMAIL_KEY = "lurji-taro-demo-reset-email";
   const DEMO_STORE_VERSION = 3;
+  const BOOKS_CACHE_KEY = "lurji-taro-books-cache";
+  const BOOKS_CACHE_TTL_MS = 120000;
 
   const defaultDemoStore = {
     version: DEMO_STORE_VERSION,
@@ -255,6 +257,62 @@
     };
   }
 
+  function isLiveSupabaseConfigured() {
+    return Boolean(
+      !window.APP_CONFIG?.DEMO_MODE
+      && window.APP_CONFIG?.SUPABASE_URL
+      && window.APP_CONFIG?.SUPABASE_ANON_KEY
+    );
+  }
+
+  function normalizeBookCollection(books) {
+    if (!Array.isArray(books)) {
+      return [];
+    }
+
+    return books.map(normalizeSupabaseBook).filter(Boolean);
+  }
+
+  function readBooksCache() {
+    try {
+      const raw = sessionStorage.getItem(BOOKS_CACHE_KEY);
+      if (!raw) return [];
+
+      const parsed = JSON.parse(raw);
+      if (!parsed?.savedAt || !Array.isArray(parsed.books)) {
+        return [];
+      }
+
+      if (Date.now() - Number(parsed.savedAt) > BOOKS_CACHE_TTL_MS) {
+        sessionStorage.removeItem(BOOKS_CACHE_KEY);
+        return [];
+      }
+
+      return normalizeBookCollection(parsed.books);
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function writeBooksCache(books) {
+    try {
+      sessionStorage.setItem(BOOKS_CACHE_KEY, JSON.stringify({
+        savedAt: Date.now(),
+        books: normalizeBookCollection(books)
+      }));
+    } catch (error) {
+      // Ignore cache write failures.
+    }
+  }
+
+  function clearBooksCache() {
+    try {
+      sessionStorage.removeItem(BOOKS_CACHE_KEY);
+    } catch (error) {
+      // Ignore cache clear failures.
+    }
+  }
+
   function resolvePublicCoverUrl(path) {
     if (!path) return "";
 
@@ -320,11 +378,19 @@
 
   async function fetchBooksFromSupabaseRest() {
     const rows = await requestSupabaseRest("books?select=*&order=created_at.desc");
-    return Array.isArray(rows) ? rows.map(normalizeSupabaseBook).filter(Boolean) : [];
+    const books = normalizeBookCollection(rows);
+    writeBooksCache(books);
+    return books;
   }
 
   async function fetchBookFromSupabaseRest(id) {
     if (!id) return null;
+
+    const cachedBooks = readBooksCache();
+    const cachedBook = cachedBooks.find((book) => book.id === String(id));
+    if (cachedBook) {
+      return cachedBook;
+    }
 
     const rows = await requestSupabaseRest(`books?id=eq.${encodeURIComponent(id)}&select=*`);
     return Array.isArray(rows) && rows.length ? normalizeSupabaseBook(rows[0]) : null;
@@ -850,18 +916,32 @@
     },
 
     async getBooks() {
-      const supabaseMethod = this.getSupabaseMethod("getBooks");
-      if (supabaseMethod) {
+      if (isLiveSupabaseConfigured()) {
         try {
-          const books = await supabaseMethod();
-          if (Array.isArray(books) && books.length) {
-            return books.map(applyBookPrice);
+          const cachedBooks = readBooksCache();
+          if (cachedBooks.length) {
+            return cachedBooks.map(applyBookPrice);
           }
         } catch (error) {
-          // Fall through to direct REST request.
+          // Ignore cache read issues.
         }
 
-        return fetchBooksFromSupabaseRest();
+        try {
+          return await fetchBooksFromSupabaseRest();
+        } catch (error) {
+          const supabaseMethod = this.getSupabaseMethod("getBooks");
+          if (supabaseMethod) {
+            try {
+              const books = await supabaseMethod();
+              if (Array.isArray(books)) {
+                writeBooksCache(books);
+                return books.map(applyBookPrice);
+              }
+            } catch (fallbackError) {
+              // Fall through to the API request below.
+            }
+          }
+        }
       }
 
       return this.request("/books").then((books) => {
@@ -889,18 +969,32 @@
     },
 
     async getBook(id) {
-      const supabaseMethod = this.getSupabaseMethod("getBook");
-      if (supabaseMethod) {
+      if (isLiveSupabaseConfigured()) {
         try {
-          const book = await supabaseMethod(id);
-          if (book) {
-            return applyBookPrice(book);
+          const cachedBooks = readBooksCache();
+          const cachedBook = cachedBooks.find((book) => book.id === String(id));
+          if (cachedBook) {
+            return applyBookPrice(cachedBook);
           }
         } catch (error) {
-          // Fall through to direct REST request.
+          // Ignore cache read issues.
         }
 
-        return fetchBookFromSupabaseRest(id);
+        try {
+          return await fetchBookFromSupabaseRest(id);
+        } catch (error) {
+          const supabaseMethod = this.getSupabaseMethod("getBook");
+          if (supabaseMethod) {
+            try {
+              const book = await supabaseMethod(id);
+              if (book) {
+                return applyBookPrice(book);
+              }
+            } catch (fallbackError) {
+              // Fall through to the API request below.
+            }
+          }
+        }
       }
 
       return this.request(`/books/${encodeURIComponent(id)}`).then((book) => applyBookPrice(book));
@@ -909,7 +1003,10 @@
     uploadBook(payload) {
       const supabaseMethod = this.getSupabaseMethod("uploadBook");
       if (supabaseMethod) {
-        return supabaseMethod(payload);
+        return supabaseMethod(payload).then((result) => {
+          clearBooksCache();
+          return result;
+        });
       }
 
       const formData = new FormData();
@@ -920,13 +1017,19 @@
       return this.request("/books/upload", {
         method: "POST",
         body: formData
+      }).then((result) => {
+        clearBooksCache();
+        return result;
       });
     },
 
     updateBook(id, payload) {
       const supabaseMethod = this.getSupabaseMethod("updateBook");
       if (supabaseMethod) {
-        return supabaseMethod(id, payload);
+        return supabaseMethod(id, payload).then((result) => {
+          clearBooksCache();
+          return result;
+        });
       }
 
       const formData = new FormData();
@@ -939,6 +1042,9 @@
       return this.request(`/books/${encodeURIComponent(id)}`, {
         method: "PUT",
         body: formData
+      }).then((result) => {
+        clearBooksCache();
+        return result;
       });
     },
 

@@ -1098,8 +1098,6 @@
       cacheToken(session);
       await syncSessionUser();
     });
-
-    syncSessionUser();
   }
 
   window.SupabaseService = {
