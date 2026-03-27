@@ -137,7 +137,7 @@ module.exports = async function handler(req, res) {
 
         if (adminNotificationEmail) {
           await transporter.sendMail({
-            from: `"ლურჯი თარო" <${fromAddress}>`,
+            from: `"წიგნების თარო" <${fromAddress}>`,
             to: adminNotificationEmail,
             subject: "ახალი გადახდილი წიგნის შეკვეთა",
             html: `
@@ -158,9 +158,9 @@ module.exports = async function handler(req, res) {
           const hasDownload = Boolean(signedDownloadUrl);
 
           await transporter.sendMail({
-            from: `"ლურჯი თარო" <${fromAddress}>`,
+            from: `"წიგნების თარო" <${fromAddress}>`,
             to: existingSale.buyer_email,
-            subject: "თქვენი წიგნი მზად არის — ლურჯი თარო",
+            subject: "თქვენი წიგნი მზად არის — წიგნების თარო",
             html: `
               <div style="font-family:Arial;padding:20px;color:#17355b;">
                 <h2 style="color:#2269c4;">გადახდა წარმატებით დადასტურდა</h2>
@@ -192,7 +192,7 @@ module.exports = async function handler(req, res) {
 
                 <hr style="margin:20px 0;" />
 
-                <p style="font-size:14px;color:#6b7280;">მადლობა ნდობისთვის,<br />ლურჯი თარო</p>
+                <p style="font-size:14px;color:#6b7280;">მადლობა ნდობისთვის,<br />წიგნების თარო</p>
               </div>
             `
           });

@@ -75,12 +75,18 @@
 
   function buildCover(book, large = false) {
     const coverClass = large ? "book-cover-large" : "book-cover";
+    const coverFlags = `
+      <div class="cover-flags">
+        <span class="cover-type">${escapeHTML(formatTypeLabel(book.type))}</span>
+        ${book.ageRestricted ? '<span class="cover-age">18+</span>' : ""}
+      </div>
+    `;
     const visual = book.coverUrl
       ? `
         <img class="cover-image" src="${escapeHTML(book.coverUrl)}" alt="${escapeHTML(book.title)}" loading="lazy" />
         <div class="cover-overlay">
           <div class="cover-top">
-            <span class="cover-type">${escapeHTML(formatTypeLabel(book.type))}</span>
+            ${coverFlags}
             <strong class="cover-title">${escapeHTML(book.title)}</strong>
           </div>
           <div class="cover-bottom">
@@ -91,7 +97,7 @@
       `
       : `
         <div class="cover-top">
-          <span class="cover-type">${escapeHTML(formatTypeLabel(book.type))}</span>
+          ${coverFlags}
           <strong class="cover-title">${escapeHTML(book.title)}</strong>
         </div>
         <div class="cover-bottom">
@@ -118,7 +124,6 @@
             <span class="badge">${escapeHTML(book.author)}</span>
             <span class="badge">${escapeHTML(book.genre)}</span>
             <span class="badge">${escapeHTML(book.details)}</span>
-            ${book.ageRestricted ? '<span class="badge badge-danger">18+</span>' : ""}
           </div>
           <div class="price-row">
             <div class="price-label">

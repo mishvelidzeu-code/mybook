@@ -149,12 +149,10 @@ textarea {
   display: grid;
   place-items: center;
   border-radius: 18px;
-  background: linear-gradient(135deg, #8bc5ff, #2269c4);
-  color: #ffffff;
-  font-family: "Georgia", serif;
-  font-size: 1.2rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  background: center / cover no-repeat url("../icons/books-shelf-logo.svg");
+  color: transparent;
+  font-size: 0;
+  letter-spacing: 0;
   box-shadow: 0 16px 28px rgba(34, 105, 196, 0.2);
 }
 
@@ -465,6 +463,7 @@ textarea {
 
 .book-card {
   display: grid;
+  grid-template-rows: auto 1fr;
   gap: 10px;
   padding: 12px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(240, 247, 255, 0.9));
@@ -530,6 +529,13 @@ textarea {
   z-index: 1;
 }
 
+.cover-flags {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .cover-top strong,
 .cover-bottom strong {
   display: block;
@@ -542,6 +548,17 @@ textarea {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.72);
   color: var(--primary-deep);
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+
+.cover-age {
+  display: inline-flex;
+  width: fit-content;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(255, 240, 241, 0.9);
+  color: #a2323f;
   font-size: 0.62rem;
   font-weight: 800;
 }
@@ -575,6 +592,11 @@ textarea {
   background: rgba(255, 255, 255, 0.82);
 }
 
+.cover-overlay .cover-age {
+  background: rgba(255, 240, 241, 0.92);
+  color: #8e2230;
+}
+
 .cover-overlay .cover-title,
 .cover-overlay .cover-size,
 .cover-overlay .cover-author {
@@ -588,10 +610,22 @@ textarea {
 
 .book-meta {
   display: grid;
+  grid-template-rows: auto auto auto auto auto;
+  align-content: start;
   gap: 8px;
 }
 
-.book-meta h3,
+.book-meta h3 {
+  margin: 0;
+  min-height: 2.5rem;
+  font-size: clamp(1rem, 3.4vw, 1.12rem);
+  line-height: 1.18;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .book-focus-copy h2 {
   font-size: 1.5rem;
   line-height: 1.1;
@@ -609,6 +643,8 @@ textarea {
 
 .badges {
   gap: 8px;
+  align-items: flex-start;
+  min-height: 3rem;
 }
 
 .badge {
