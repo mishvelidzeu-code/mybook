@@ -37,19 +37,18 @@
         </div>
 
         <div class="section-links">
-          <a class="section-link" href="#ebooksSection"><span>1.</span> ელექტრონული წიგნები</a>
-          <a class="section-link" href="#audioSection"><span>2.</span> აუდიო წიგნები</a>
-          <a class="section-link" href="#topBooksSection"><span>3.</span> თვის ტოპ წიგნები</a>
-          <a class="section-link" href="#authorsSection"><span>4.</span> ავტორების მიხედვით</a>
-          <a class="section-link" href="#newBooksSection"><span>5.</span> ახალი დამატებულები</a>
-          <a class="section-link" href="#searchSection"><span>6.</span> ძებნით</a>
+          <a class="section-link" href="#ebooksSection">ელექტრონული წიგნები</a>
+          <a class="section-link" href="#audioSection">აუდიო წიგნები</a>
+          <a class="section-link" href="#topBooksSection">თვის ტოპ წიგნები</a>
+          <a class="section-link" href="#authorsSection">ავტორების მიხედვით</a>
+          <a class="section-link" href="#newBooksSection">ახალი დამატებულები</a>
+          <a class="section-link" href="#searchSection">ძებნა</a>
         </div>
       </section>
 
       <section class="hero-card surface">
         <div class="hero-copy">
-          <span class="eyebrow">მყიდველისთვის მზად • შესვლა არ არის საჭირო</span>
-          <h2>გახსნისთანავე შეხვდი ბიბლიოთეკას და იყიდე წიგნი 1 კლიკით</h2>
+          <h2>გახსნისთანავე შეხვდი ბიბლიოთეკას და იყიდე წიგნი მარტივად</h2>
           <p>
             საიტი პირველივე წამიდან მორგებულია მკითხველზე: მოძებნე სათაური, ნახე ახალი დამატებულები,
             მოუსმინე აუდიოწიგნებს და შეიძინე ავტორიზაციის გარეშე. ავტორის მხარე მუშაობს მხოლოდ პანელიდან.
@@ -71,20 +70,20 @@
             <span>მოსასმენი ნებისმიერ დროს</span>
           </article>
           <article class="feature-pill">
-            <strong>1 კლიკით ყიდვა</strong>
+            <strong>მყისიერი ყიდვა</strong>
             <span>შესვლა საჭირო არ არის</span>
           </article>
         </div>
       </section>
 
-      <section id="searchSection" class="panel surface">
+      <section id="searchSection" class="panel surface search-panel">
         <div class="section-head">
-          <h2>6. ძებნით</h2>
-          <span>იპოვე წიგნი სათაურით, ავტორით, ჟანრით ან ფორმატით</span>
+          <h2>ძებნა</h2>
+          <span>იპოვე წიგნი სათაურით, ჟანრით ან ფორმატით</span>
         </div>
 
-        <div class="toolbar-grid toolbar-grid--triple">
-          <input id="searchBooks" class="input" type="search" placeholder="მოძებნე წიგნი ან ავტორი..." />
+        <form id="searchForm" class="toolbar-grid toolbar-grid--search">
+          <input id="searchBooks" class="input" type="search" placeholder="მოძებნე წიგნი..." />
           <select id="filterFormat" class="input">
             <option value="all">ყველა ფორმატი</option>
             <option value="ebook">ელექტრონული წიგნები</option>
@@ -98,16 +97,14 @@
             <option value="რომანი">რომანი</option>
             <option value="თვითგანვითარება">თვითგანვითარება</option>
           </select>
-        </div>
-
-        <p id="searchHint" class="panel-note">ძებნის შედეგები აქ გამოჩნდება.</p>
-        <div id="searchResultsGrid" class="book-grid"></div>
+          <button class="primary-btn" type="submit">ძებნა</button>
+        </form>
       </section>
 
       <section id="ebooksSection" class="panel surface">
         <div class="section-head with-link">
           <div>
-            <h2>1. ელექტრონული წიგნები</h2>
+            <h2>ელექტრონული წიგნები</h2>
             <span>სწრაფი კითხვებისთვის და მყისიერი ჩამოტვირთვისთვის</span>
           </div>
           <a class="mini-link" href="library.html?format=ebook">ყველას ნახვა</a>
@@ -118,7 +115,7 @@
       <section id="audioSection" class="panel surface">
         <div class="section-head with-link">
           <div>
-            <h2>2. აუდიო წიგნები</h2>
+            <h2>აუდიო წიგნები</h2>
             <span>მოსასმენად გზაში, სპორტზე ან მუშაობისას</span>
           </div>
           <a class="mini-link" href="library.html?format=audio">ყველას ნახვა</a>
@@ -128,24 +125,27 @@
 
       <section class="panel surface" id="topBooksSection">
         <div class="section-head">
-          <h2>3. თვის ტოპ წიგნები</h2>
+          <h2>თვის ტოპ წიგნები</h2>
           <span>ყველაზე მოთხოვნადი და რეკომენდებული გამოცემები</span>
         </div>
         <div id="topBooksGrid" class="book-grid"></div>
       </section>
 
       <section id="authorsSection" class="panel surface">
-        <div class="section-head">
-          <h2>4. ავტორების მიხედვით</h2>
-          <span>დაალაგე კატალოგი იმ ავტორით, ვინც უკვე მოგწონს</span>
+        <div class="section-head with-tools">
+          <div>
+            <h2>ავტორების მიხედვით</h2>
+            <span>გადაათვალიერე ავტორები ერთ ხაზში და მოძებნე სასურველი სახელი</span>
+          </div>
+          <input id="authorSearch" class="input author-search" type="search" placeholder="მოძებნე ავტორი..." />
         </div>
-        <div id="authorsGrid" class="author-grid"></div>
+        <div id="authorsGrid" class="author-strip"></div>
       </section>
 
       <section id="newBooksSection" class="panel surface">
         <div class="section-head">
-          <h2>5. ახალი დამატებულები</h2>
-          <span>ახლად ატვირთული წიგნები და აუდიოწიგნები</span>
+          <h2>ახალი დამატებულები</h2>
+          <span>ახლად დამატებული წიგნები და აუდიოწიგნები ერთ სივრცეში</span>
         </div>
         <div id="newBooksGrid" class="book-grid"></div>
       </section>

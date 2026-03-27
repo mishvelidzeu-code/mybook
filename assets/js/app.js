@@ -281,9 +281,10 @@
     container.innerHTML = books.map((book, index) => buildBookCard(book, index)).join("");
   }
 
-  function renderAuthors(container, books) {
+  function renderAuthors(container, books, searchValue = "") {
     if (!container) return;
 
+    const normalizedSearch = String(searchValue || "").trim().toLowerCase();
     const authorMap = books.reduce((accumulator, book) => {
       const current = accumulator.get(book.author) || { name: book.author, count: 0 };
       current.count += 1;
@@ -291,40 +292,42 @@
       return accumulator;
     }, new Map());
 
-    const authors = [...authorMap.values()].sort((left, right) => right.count - left.count || left.name.localeCompare(right.name, "ka"));
+    const authors = [...authorMap.values()]
+      .filter((author) => !normalizedSearch || author.name.toLowerCase().includes(normalizedSearch))
+      .sort((left, right) => right.count - left.count || left.name.localeCompare(right.name, "ka"));
 
     if (!authors.length) {
-      renderEmptyState(container, "ავტორები ვერ მოიძებნა", "კატალოგის შევსების შემდეგ ავტორები აქ გამოჩნდება.");
+      renderEmptyState(container, "ავტორი ვერ მოიძებნა", "სცადე სხვა სახელი ან გაასუფთავე ძებნა.");
       return;
     }
 
     container.innerHTML = authors.map((author) => `
-      <article class="author-card fade-up">
+      <article class="author-card author-card--slide fade-up">
         <strong>${escapeHTML(author.name)}</strong>
-        <small>${author.count} გამოცემა კატალოგში</small>
+        <small>${author.count} წიგნი კატალოგში</small>
         <a class="mini-link author-link" href="library.html?author=${encodeURIComponent(author.name)}">ამ ავტორის ნახვა</a>
       </article>
     `).join("");
   }
 
   async function renderStorefront() {
-    const searchResultsGrid = document.getElementById("searchResultsGrid");
-    if (!searchResultsGrid) return;
+    const ebookBooksGrid = document.getElementById("ebookBooksGrid");
+    if (!ebookBooksGrid) return;
 
+    const searchForm = document.getElementById("searchForm");
     const searchInput = document.getElementById("searchBooks");
     const formatFilter = document.getElementById("filterFormat");
     const genreFilter = document.getElementById("filterGenre");
-    const searchHint = document.getElementById("searchHint");
-    const ebookBooksGrid = document.getElementById("ebookBooksGrid");
+    const authorSearch = document.getElementById("authorSearch");
     const audioBooksGrid = document.getElementById("audioBooksGrid");
     const topBooksGrid = document.getElementById("topBooksGrid");
     const authorsGrid = document.getElementById("authorsGrid");
     const newBooksGrid = document.getElementById("newBooksGrid");
 
-    renderLoadingState(searchResultsGrid, "ძებნის სივრცე მზადდება...");
     renderLoadingState(ebookBooksGrid, "კატალოგი იტვირთება...");
     renderLoadingState(audioBooksGrid, "აუდიო კატალოგი იტვირთება...");
     renderLoadingState(topBooksGrid, "ტოპ წიგნები იტვირთება...");
+    renderLoadingState(authorsGrid, "ავტორები იტვირთება...");
     renderLoadingState(newBooksGrid, "ახალი დამატებულები იტვირთება...");
 
     try {
@@ -356,45 +359,40 @@
         "ახალი დამატებულები ვერ მოიძებნა",
         "ახალი ატვირთვები აქ გამოჩნდება."
       );
-      renderAuthors(authorsGrid, books);
-
-      const drawSearch = () => {
-        const search = searchInput?.value || "";
-        const format = formatFilter?.value || "all";
-        const genre = genreFilter?.value || "all";
-        const filtered = filterBooks(books, search, format, genre);
-        const hasQuery = search.trim() || format !== "all" || genre !== "all";
-
-        if (!hasQuery) {
-          renderEmptyState(
-            searchResultsGrid,
-            "ძებნა დაიწყე აქედან",
-            "აკრიფე სათაური, აირჩიე ჟანრი ან ფორმატი და შედეგები მაშინვე გამოჩნდება."
-          );
-          if (searchHint) {
-            searchHint.textContent = "ძებნის შედეგები აქ გამოჩნდება.";
-          }
-          return;
-        }
-
-        if (searchHint) {
-          searchHint.textContent = `ნაპოვნია ${filtered.length} შედეგი.`;
-        }
-
-        renderSectionGrid(
-          searchResultsGrid,
-          filtered,
-          "შედეგი ვერ მოიძებნა",
-          "სცადე სხვა სიტყვა, ჟანრი ან ფორმატი."
-        );
+      const drawAuthors = () => {
+        renderAuthors(authorsGrid, books, authorSearch?.value || "");
       };
 
-      searchInput?.addEventListener("input", drawSearch);
-      formatFilter?.addEventListener("change", drawSearch);
-      genreFilter?.addEventListener("change", drawSearch);
-      drawSearch();
+      searchForm?.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const params = new URLSearchParams();
+        const searchValue = String(searchInput?.value || "").trim();
+        const formatValue = formatFilter?.value || "all";
+        const genreValue = genreFilter?.value || "all";
+
+        if (searchValue) {
+          params.set("q", searchValue);
+        }
+        if (formatValue !== "all") {
+          params.set("format", formatValue);
+        }
+        if (genreValue !== "all") {
+          params.set("genre", genreValue);
+        }
+
+        const targetUrl = params.toString() ? `library.html?${params.toString()}` : "library.html";
+        window.location.href = targetUrl;
+      });
+
+      authorSearch?.addEventListener("input", drawAuthors);
+      drawAuthors();
     } catch (error) {
-      renderEmptyState(searchResultsGrid, "კატალოგი ვერ ჩაიტვირთა", error.message || "გთხოვ სცადო მოგვიანებით.");
+      renderEmptyState(ebookBooksGrid, "კატალოგი ვერ ჩაიტვირთა", error.message || "გთხოვ სცადო მოგვიანებით.");
+      renderEmptyState(audioBooksGrid, "აუდიო კატალოგი ვერ ჩაიტვირთა", "გთხოვ სცადო მოგვიანებით.");
+      renderEmptyState(topBooksGrid, "ტოპ სია ვერ ჩაიტვირთა", "გთხოვ სცადო მოგვიანებით.");
+      renderEmptyState(authorsGrid, "ავტორები ვერ ჩაიტვირთა", "გთხოვ სცადო მოგვიანებით.");
+      renderEmptyState(newBooksGrid, "ახალი დამატებულები ვერ ჩაიტვირთა", "გთხოვ სცადო მოგვიანებით.");
     }
   }
 
