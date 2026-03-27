@@ -196,6 +196,45 @@
     return normalizeProfileRow(result?.profile, user);
   }
 
+  async function authRequest(path, payload) {
+    const config = getConfig();
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 10000);
+
+    try {
+      const response = await fetch(`${config.SUPABASE_URL}/auth/v1/${path}`, {
+        method: "POST",
+        headers: {
+          apikey: config.SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${config.SUPABASE_ANON_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload || {}),
+        signal: controller.signal
+      });
+
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(
+          result?.msg
+          || result?.error_description
+          || result?.error
+          || "ავტორიზაციის მოთხოვნა ვერ შესრულდა"
+        );
+      }
+
+      return result;
+    } catch (error) {
+      if (error?.name === "AbortError") {
+        throw new Error("ავტორიზაციის მოთხოვნას ძალიან დიდი დრო დასჭირდა, თავიდან სცადე");
+      }
+
+      throw error;
+    } finally {
+      window.clearTimeout(timeoutId);
+    }
+  }
+
   function escapeXml(value) {
     return String(value || "")
       .replace(/&/g, "&amp;")
@@ -687,47 +726,54 @@
 
   async function signIn(payload) {
     const supabase = getClient();
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const result = await authRequest("token?grant_type=password", {
       email: payload.email,
       password: payload.password
     });
 
-    if (error) {
-      throw error;
+    const accessToken = result?.access_token || result?.session?.access_token || "";
+    const refreshToken = result?.refresh_token || result?.session?.refresh_token || "";
+    const authUser = result?.user || result?.session?.user || null;
+
+    if (supabase && accessToken && refreshToken) {
+      try {
+        await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken
+        });
+      } catch (error) {
+        // Ignore session persistence issues here; cached auth still allows redirect.
+      }
     }
 
-    cacheToken(data.session);
+    cacheToken({ access_token: accessToken });
 
-    const fallbackProfile = normalizeProfileRow(null, data.user);
+    const fallbackProfile = normalizeProfileRow(null, authUser);
     cacheUser(fallbackProfile);
-    syncSessionUser().catch(() => null);
+    ensureProfileRecord(fallbackProfile, { access_token: accessToken }).catch(() => null);
 
     return {
-      token: data.session?.access_token || "",
+      token: accessToken,
       user: fallbackProfile
     };
   }
 
   async function signUp(payload) {
     const supabase = getClient();
-    const { data, error } = await supabase.auth.signUp({
+    const result = await authRequest("signup", {
       email: payload.email,
       password: payload.password,
-      options: {
-        data: {
-          full_name: payload.name,
-          role: payload.role
-        }
+      data: {
+        full_name: payload.name,
+        role: payload.role
       }
     });
 
-    if (error) {
-      throw error;
-    }
+    const accessToken = result?.access_token || result?.session?.access_token || "";
+    const refreshToken = result?.refresh_token || result?.session?.refresh_token || "";
+    const authUser = result?.user || result?.session?.user || null;
 
-    cacheToken(data.session);
-
-    if (!data.session) {
+    if (!accessToken || !refreshToken) {
       return {
         success: true,
         requiresEmailConfirmation: true,
@@ -735,24 +781,29 @@
       };
     }
 
-    try {
-      const profile = await getCurrentProfile();
-      return {
-        success: true,
-        message: "რეგისტრაცია დასრულდა, შეგიძლია ატვირთვა დაიწყო",
-        token: data.session?.access_token || "",
-        user: profile
-      };
-    } catch (profileError) {
-      const fallbackProfile = normalizeProfileRow(null, data.user);
-      cacheUser(fallbackProfile);
-      return {
-        success: true,
-        message: "რეგისტრაცია დასრულდა, შეგიძლია ატვირთვა დაიწყო",
-        token: data.session?.access_token || "",
-        user: fallbackProfile
-      };
+    if (supabase) {
+      try {
+        await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken
+        });
+      } catch (error) {
+        // Ignore session persistence issues here; cached auth still allows redirect.
+      }
     }
+
+    cacheToken({ access_token: accessToken });
+
+    const fallbackProfile = normalizeProfileRow(null, authUser);
+    cacheUser(fallbackProfile);
+    ensureProfileRecord(fallbackProfile, { access_token: accessToken }).catch(() => null);
+
+    return {
+      success: true,
+      message: "რეგისტრაცია დასრულდა, შეგიძლია ატვირთვა დაიწყო",
+      token: accessToken,
+      user: fallbackProfile
+    };
   }
 
   async function requestPasswordReset(payload) {
