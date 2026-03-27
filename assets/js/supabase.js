@@ -1216,9 +1216,29 @@
 
   if (isConfigured()) {
     const supabase = getClient();
-    supabase.auth.onAuthStateChange(async (_event, session) => {
+    supabase.auth.onAuthStateChange(async (event, session) => {
       if (!session?.user) {
-        clearCachedSession();
+        if (event === "SIGNED_OUT" || event === "USER_DELETED") {
+          clearCachedSession();
+          return;
+        }
+
+        const cachedUser = readCachedUser();
+        if (cachedUser) {
+          return;
+        }
+
+        try {
+          const latestSession = await getCurrentSession();
+          if (latestSession?.user) {
+            cacheToken(latestSession);
+            await syncSessionUser();
+            return;
+          }
+        } catch (error) {
+          // Ignore transient auth restore issues.
+        }
+
         return;
       }
 
