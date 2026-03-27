@@ -63,6 +63,11 @@ function createSupabaseAdminClient() {
   }
 
   return createClient(process.env.SUPABASE_URL, supabaseServerKey, {
+    global: {
+      headers: {
+        apikey: supabaseServerKey
+      }
+    },
     auth: {
       persistSession: false,
       autoRefreshToken: false

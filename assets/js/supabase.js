@@ -38,6 +38,11 @@
     if (!client) {
       const config = getConfig();
       client = window.supabase.createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY, {
+        global: {
+          headers: {
+            apikey: config.SUPABASE_ANON_KEY
+          }
+        },
         auth: {
           persistSession: true,
           autoRefreshToken: true,
@@ -600,20 +605,24 @@
   }
 
   async function getCurrentAuthUser() {
-    const supabase = getClient();
-    if (!supabase) return null;
-
     const session = await getCurrentSession();
     if (session?.user) {
       return session.user;
     }
 
-    const { data, error } = await supabase.auth.getUser();
-    if (error) {
-      throw error;
+    const cachedUser = readCachedUser();
+    if (cachedUser?.id) {
+      return {
+        id: cachedUser.id,
+        email: cachedUser.email || "",
+        user_metadata: {
+          full_name: cachedUser.name || "",
+          role: cachedUser.role || "author"
+        }
+      };
     }
 
-    return data.user || null;
+    return null;
   }
 
   async function getCurrentSession() {
