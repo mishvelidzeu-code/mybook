@@ -152,6 +152,45 @@
     };
   }
 
+  function getAccessTokenFromSession(session) {
+    return session?.access_token || localStorage.getItem("token") || "";
+  }
+
+  async function ensureProfileRecord(user, session) {
+    const accessToken = getAccessTokenFromSession(session);
+    if (!user?.id || !accessToken) {
+      return null;
+    }
+
+    const response = await fetch("/api/ensure-profile", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`
+      },
+      body: JSON.stringify({
+        name: user?.name || user?.user_metadata?.full_name || "",
+        role: user?.role || user?.user_metadata?.role || "author"
+      })
+    });
+
+    if (!response.ok) {
+      let errorMessage = "პროფილის აღდგენა ვერ შესრულდა";
+
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.error || errorData.message || errorMessage;
+      } catch (error) {
+        errorMessage = response.statusText || errorMessage;
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    const result = await response.json().catch(() => ({}));
+    return normalizeProfileRow(result?.profile, user);
+  }
+
   function escapeXml(value) {
     return String(value || "")
       .replace(/&/g, "&amp;")
@@ -516,6 +555,7 @@
   }
 
   function mapBookRow(row) {
+    const externalCoverUrl = String(row.coverUrl || row.cover_url || "").trim();
     return applyBookPrice({
       id: row.id,
       title: row.title,
@@ -531,7 +571,7 @@
       fileName: row.file_path ? row.file_path.split("/").pop() : "",
       coverName: row.cover_path ? row.cover_path.split("/").pop() : "",
       coverPath: row.cover_path || "",
-      coverUrl: getPublicCoverUrl(row.cover_path),
+      coverUrl: externalCoverUrl || getPublicCoverUrl(row.cover_path),
       filePath: row.file_path || "",
       createdAt: row.created_at,
       updatedAt: row.updated_at
@@ -637,6 +677,20 @@
 
     if (error) {
       throw error;
+    }
+
+    if (!data) {
+      try {
+        const ensuredProfile = await ensureProfileRecord(user, session);
+        if (ensuredProfile) {
+          cacheUser(ensuredProfile);
+          return ensuredProfile;
+        }
+      } catch (ensureError) {
+        const fallbackProfile = normalizeProfileRow(null, user);
+        cacheUser(fallbackProfile);
+        return fallbackProfile;
+      }
     }
 
     const profile = normalizeProfileRow(data, user);
@@ -873,7 +927,7 @@
     });
 
     if (error) {
-      throw error;
+      throw new Error(error.message || "ფაილის ატვირთვა ვერ შესრულდა");
     }
 
     return path;
@@ -887,30 +941,62 @@
       throw new Error("ატვირთვისთვის საჭიროა ავტორის ან გამომცემლის ანგარიში");
     }
 
-    const config = getConfig();
-    const filePath = await uploadFile(config.SUPABASE_BOOKS_BUCKET, profile.id, payload.ebook, "book");
-    const coverPath = await uploadFile(config.SUPABASE_COVERS_BUCKET, profile.id, payload.cover, "cover");
+    const session = await getCurrentSession();
+    let activeProfile = profile;
 
-    const { data, error } = await supabase
+    try {
+      const ensuredProfile = await ensureProfileRecord(profile, session);
+      if (ensuredProfile?.id) {
+        activeProfile = ensuredProfile;
+      }
+    } catch (error) {
+      activeProfile = profile;
+    }
+
+    const config = getConfig();
+    const filePath = await uploadFile(config.SUPABASE_BOOKS_BUCKET, activeProfile.id, payload.ebook, "book");
+    const coverPath = await uploadFile(config.SUPABASE_COVERS_BUCKET, activeProfile.id, payload.cover, "cover");
+
+    const insertPayload = {
+      uploader_id: activeProfile.id,
+      title: payload.title,
+      author: payload.author,
+      genre: payload.genre,
+      type: payload.type,
+      details: payload.details,
+      price: Number(payload.price || 0),
+      description: payload.description,
+      top_pick: Boolean(payload.topPick),
+      age_restricted: Boolean(payload.ageRestricted),
+      file_path: filePath,
+      cover_path: coverPath
+    };
+
+    let data;
+    let error;
+    ({ data, error } = await supabase
       .from("books")
-      .insert({
-        uploader_id: profile.id,
-        title: payload.title,
-        author: payload.author,
-        genre: payload.genre,
-        type: payload.type,
-        details: payload.details,
-        price: Number(payload.price || 0),
-        description: payload.description,
-        top_pick: Boolean(payload.topPick),
-        age_restricted: Boolean(payload.ageRestricted),
-        file_path: filePath,
-        cover_path: coverPath
-      })
+      .insert(insertPayload)
       .select("*")
-      .single();
+      .single());
+
+    if (error && /profiles|foreign key/i.test(String(error.message || ""))) {
+      const restoredProfile = await ensureProfileRecord(activeProfile, session);
+      if (restoredProfile?.id) {
+        insertPayload.uploader_id = restoredProfile.id;
+        ({ data, error } = await supabase
+          .from("books")
+          .insert(insertPayload)
+          .select("*")
+          .single());
+      }
+    }
 
     if (error) {
+      if (/profiles|foreign key/i.test(String(error.message || ""))) {
+        throw new Error("ავტორის პროფილი ბოლომდე არ იყო გამზადებული. გთხოვ თავიდან შეხვიდე ანგარიშში და მერე ისევ სცადო ატვირთვა.");
+      }
+
       throw error;
     }
 

@@ -15,23 +15,51 @@
     }
   }
 
+  async function resolveCurrentUser() {
+    const cachedUser = getCurrentUser();
+    if (cachedUser) {
+      return cachedUser;
+    }
+
+    if (window.SupabaseService?.isEnabled?.() && typeof window.SupabaseService.syncSessionUser === "function") {
+      try {
+        const syncedUser = await window.SupabaseService.syncSessionUser();
+        if (syncedUser) {
+          return syncedUser;
+        }
+      } catch (error) {
+        return getCurrentUser();
+      }
+    }
+
+    return getCurrentUser();
+  }
+
+  function prefillAuthor(user) {
+    const authorInput = document.getElementById("bookAuthor");
+    if (!authorInput || authorInput.value) {
+      return;
+    }
+
+    authorInput.value = user?.name || "";
+  }
+
   const uploadForm = document.getElementById("uploadForm");
   if (!uploadForm) return;
 
-  const user = getCurrentUser();
-  if (user) {
-    const authorInput = document.getElementById("bookAuthor");
-    if (authorInput && !authorInput.value) {
-      authorInput.value = user.name || "";
+  (async () => {
+    const user = await resolveCurrentUser();
+    if (user) {
+      prefillAuthor(user);
     }
-  }
+  })();
 
   uploadForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const currentUser = getCurrentUser();
+    const currentUser = await resolveCurrentUser();
     if (!currentUser || !["author", "publisher", "admin"].includes(currentUser.role)) {
-      showUploadMessage("ატვირთვისთვის ჯერ დარეგისტრირდი ან შედი ავტორის ანგარიშით", "error");
+      showUploadMessage("ატვირთვისთვის ჯერ შედი ავტორის ან გამომცემლის ანგარიშით", "error");
       return;
     }
 
@@ -44,7 +72,9 @@
     }
 
     const submitButton = uploadForm.querySelector('button[type="submit"]');
-    submitButton.disabled = true;
+    if (submitButton) {
+      submitButton.disabled = true;
+    }
 
     try {
       const payload = {
@@ -63,14 +93,13 @@
       const result = await Api.uploadBook(payload);
       showUploadMessage(result.message || "ატვირთვა წარმატებულია", "success");
       uploadForm.reset();
-
-      if (user?.name) {
-        document.getElementById("bookAuthor").value = user.name;
-      }
+      prefillAuthor(currentUser);
     } catch (error) {
       showUploadMessage(error.message || "ატვირთვა ვერ შესრულდა", "error");
     } finally {
-      submitButton.disabled = false;
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
     }
   });
 })();
