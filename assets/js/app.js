@@ -73,6 +73,119 @@
     `;
   }
 
+  function getAuthorInitials(name) {
+    const parts = String(name || "")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+    return (parts.slice(0, 2).map((part) => part.charAt(0)).join("") || "ა").toUpperCase();
+  }
+
+  function buildAuthorAvatar(name) {
+    const palettes = [
+      ["#e9f3ff", "#9ecbff", "#2f74d0"],
+      ["#eef8ff", "#9fd7e8", "#3f88c8"],
+      ["#f1f6ff", "#b8cfff", "#446ec8"],
+      ["#ecf7ff", "#9ed0ff", "#1f6bb8"]
+    ];
+    const hash = [...String(name || "")].reduce((value, char) => value + char.charCodeAt(0), 0);
+    const [light, mid, deep] = palettes[hash % palettes.length];
+    const initials = escapeHTML(getAuthorInitials(name));
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none">
+        <defs>
+          <linearGradient id="authorAvatarGradient" x1="10" y1="8" x2="82" y2="88" gradientUnits="userSpaceOnUse">
+            <stop stop-color="${light}" />
+            <stop offset="0.55" stop-color="${mid}" />
+            <stop offset="1" stop-color="${deep}" />
+          </linearGradient>
+        </defs>
+        <rect x="4" y="4" width="88" height="88" rx="28" fill="url(#authorAvatarGradient)" />
+        <circle cx="48" cy="34" r="15" fill="rgba(255,255,255,0.92)" />
+        <path d="M24 76c3-14 13-22 24-22s21 8 24 22" fill="rgba(255,255,255,0.92)" />
+        <rect x="16" y="14" width="22" height="6" rx="3" fill="rgba(255,255,255,0.5)" />
+        <text x="48" y="88" text-anchor="middle" font-size="20" font-weight="800" fill="#ffffff" font-family="Georgia, serif">${initials}</text>
+      </svg>
+    `;
+
+    return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+  }
+
+  function buildAuthorCollection(books) {
+    const authorMap = books.reduce((accumulator, book) => {
+      const current = accumulator.get(book.author) || {
+        name: book.author,
+        count: 0,
+        ebookCount: 0,
+        audioCount: 0,
+        latestAt: "",
+        avatarUrl: buildAuthorAvatar(book.author)
+      };
+
+      current.count += 1;
+      if (book.type === "audio") {
+        current.audioCount += 1;
+      } else {
+        current.ebookCount += 1;
+      }
+
+      if (!current.latestAt || new Date(book.createdAt) > new Date(current.latestAt)) {
+        current.latestAt = book.createdAt;
+      }
+
+      accumulator.set(book.author, current);
+      return accumulator;
+    }, new Map());
+
+    return [...authorMap.values()];
+  }
+
+  function filterAuthorCollection(authors, searchValue = "") {
+    const normalizedSearch = String(searchValue || "").trim().toLowerCase();
+    return authors
+      .filter((author) => !normalizedSearch || author.name.toLowerCase().includes(normalizedSearch))
+      .sort((left, right) => right.count - left.count || left.name.localeCompare(right.name, "ka"));
+  }
+
+  function formatAuthorSummary(author) {
+    const labels = [];
+
+    if (author.ebookCount) {
+      labels.push(`${author.ebookCount} ელწიგნი`);
+    }
+    if (author.audioCount) {
+      labels.push(`${author.audioCount} აუდიოწიგნი`);
+    }
+    if (author.latestAt) {
+      labels.push(`ბოლო განახლება ${formatDate(author.latestAt)}`);
+    }
+
+    return labels.join(" • ");
+  }
+
+  function buildAuthorCard(author, variant = "strip", index = 0) {
+    const isDirectory = variant === "directory";
+    const actionHref = isDirectory
+      ? `library.html?author=${encodeURIComponent(author.name)}`
+      : `authors.html?q=${encodeURIComponent(author.name)}`;
+    const actionLabel = isDirectory ? "ამ ავტორის წიგნები" : "ავტორის გვერდი";
+    const cardClass = isDirectory ? "author-card author-card--directory fade-up" : "author-card author-card--slide fade-up";
+
+    return `
+      <article class="${cardClass}" style="animation-delay:${index * 35}ms" data-target-url="${actionHref}">
+        <div class="author-card-top">
+          <img class="author-avatar" src="${author.avatarUrl}" alt="${escapeHTML(author.name)}" loading="lazy" />
+          <div class="author-card-copy">
+            <strong>${escapeHTML(author.name)}</strong>
+            <small>${author.count} წიგნი კატალოგში</small>
+          </div>
+        </div>
+        <p class="author-card-note">${escapeHTML(formatAuthorSummary(author))}</p>
+        <a class="mini-link author-link" href="${actionHref}">${actionLabel}</a>
+      </article>
+    `;
+  }
+
   function buildCover(book, large = false) {
     const coverClass = large ? "book-cover-large" : "book-cover";
     const coverFlags = `
@@ -286,33 +399,18 @@
     container.innerHTML = books.map((book, index) => buildBookCard(book, index)).join("");
   }
 
-  function renderAuthors(container, books, searchValue = "") {
+  function renderAuthors(container, books, searchValue = "", options = {}) {
     if (!container) return;
 
-    const normalizedSearch = String(searchValue || "").trim().toLowerCase();
-    const authorMap = books.reduce((accumulator, book) => {
-      const current = accumulator.get(book.author) || { name: book.author, count: 0 };
-      current.count += 1;
-      accumulator.set(book.author, current);
-      return accumulator;
-    }, new Map());
-
-    const authors = [...authorMap.values()]
-      .filter((author) => !normalizedSearch || author.name.toLowerCase().includes(normalizedSearch))
-      .sort((left, right) => right.count - left.count || left.name.localeCompare(right.name, "ka"));
+    const variant = options.variant || "strip";
+    const authors = filterAuthorCollection(buildAuthorCollection(books), searchValue);
 
     if (!authors.length) {
       renderEmptyState(container, "ავტორი ვერ მოიძებნა", "სცადე სხვა სახელი ან გაასუფთავე ძებნა.");
       return;
     }
 
-    container.innerHTML = authors.map((author) => `
-      <article class="author-card author-card--slide fade-up">
-        <strong>${escapeHTML(author.name)}</strong>
-        <small>${author.count} წიგნი კატალოგში</small>
-        <a class="mini-link author-link" href="library.html?author=${encodeURIComponent(author.name)}">ამ ავტორის ნახვა</a>
-      </article>
-    `).join("");
+    container.innerHTML = authors.map((author, index) => buildAuthorCard(author, variant, index)).join("");
   }
 
   async function renderStorefront() {
@@ -321,6 +419,7 @@
 
     const searchForm = document.getElementById("searchForm");
     const searchInput = document.getElementById("searchBooks");
+    const sectionFilter = document.getElementById("filterSection");
     const formatFilter = document.getElementById("filterFormat");
     const genreFilter = document.getElementById("filterGenre");
     const authorSearch = document.getElementById("authorSearch");
@@ -373,8 +472,26 @@
 
         const params = new URLSearchParams();
         const searchValue = String(searchInput?.value || "").trim();
+        const sectionValue = sectionFilter?.value || "all";
         const formatValue = formatFilter?.value || "all";
         const genreValue = genreFilter?.value || "all";
+
+        if (sectionValue === "authorsSection") {
+          if (searchValue) {
+            params.set("q", searchValue);
+          }
+          window.location.href = params.toString() ? `authors.html?${params.toString()}` : "authors.html";
+          return;
+        }
+
+        if (sectionValue !== "all" && !searchValue && formatValue === "all" && genreValue === "all") {
+          const sectionElement = document.getElementById(sectionValue);
+          if (sectionElement) {
+            sectionElement.scrollIntoView({ behavior: "smooth", block: "start" });
+            window.history.replaceState(null, "", `#${sectionValue}`);
+            return;
+          }
+        }
 
         if (searchValue) {
           params.set("q", searchValue);
@@ -401,6 +518,50 @@
     }
   }
 
+  async function renderAuthorsDirectory() {
+    const authorsGrid = document.getElementById("authorsDirectoryGrid");
+    if (!authorsGrid) return;
+
+    const searchInput = document.getElementById("authorDirectorySearch");
+    const authorsMeta = document.getElementById("authorsMeta");
+
+    renderLoadingState(authorsGrid, "ავტორები იტვირთება...");
+
+    try {
+      const books = await loadBooksForView();
+      const authors = buildAuthorCollection(books);
+      const initialQuery = query("q") || query("author") || "";
+
+      if (searchInput) {
+        searchInput.value = initialQuery;
+      }
+
+      const drawAuthorsDirectory = () => {
+        const filteredAuthors = filterAuthorCollection(authors, searchInput?.value || "");
+
+        if (authorsMeta) {
+          authorsMeta.textContent = filteredAuthors.length
+            ? `ნაპოვნია ${filteredAuthors.length} ავტორი.`
+            : "ავტორი ვერ მოიძებნა.";
+        }
+
+        if (!filteredAuthors.length) {
+          renderEmptyState(authorsGrid, "ავტორი ვერ მოიძებნა", "სცადე სხვა სახელი ან გაასუფთავე ძებნა.");
+          return;
+        }
+
+        authorsGrid.innerHTML = filteredAuthors
+          .map((author, index) => buildAuthorCard(author, "directory", index))
+          .join("");
+      };
+
+      searchInput?.addEventListener("input", drawAuthorsDirectory);
+      drawAuthorsDirectory();
+    } catch (error) {
+      renderEmptyState(authorsGrid, "ავტორები ვერ ჩაიტვირთა", error.message || "გთხოვ სცადო მოგვიანებით.");
+    }
+  }
+
   async function renderCatalog() {
     const booksGrid = document.getElementById("booksGrid");
     if (!booksGrid) return;
@@ -418,6 +579,8 @@
       const queryFormat = query("format");
       const queryGenre = query("genre");
       const querySearch = query("q");
+      const queryTop = query("top") === "1";
+      const querySort = query("sort");
 
       if (searchInput) {
         searchInput.value = queryAuthor || querySearch || "";
@@ -433,10 +596,24 @@
         const search = searchInput?.value || "";
         const format = formatFilter?.value || "all";
         const genre = genreFilter?.value || "all";
-        const filtered = filterBooks(books, search, format, genre);
+        let filtered = filterBooks(books, search, format, genre);
+
+        if (queryTop) {
+          filtered = filtered.filter((book) => book.topPick);
+        }
+
+        if (querySort === "new") {
+          filtered = [...filtered].sort((left, right) => new Date(right.createdAt) - new Date(left.createdAt));
+        }
 
         if (catalogMeta) {
-          catalogMeta.textContent = `კატალოგში ჩანს ${filtered.length} გამოცემა.`;
+          if (queryTop) {
+            catalogMeta.textContent = `ტოპ სიაში ჩანს ${filtered.length} გამოცემა.`;
+          } else if (querySort === "new") {
+            catalogMeta.textContent = `ახალ დამატებულებში ჩანს ${filtered.length} გამოცემა.`;
+          } else {
+            catalogMeta.textContent = `კატალოგში ჩანს ${filtered.length} გამოცემა.`;
+          }
         }
 
         renderSectionGrid(
@@ -535,6 +712,7 @@
 
   function init() {
     renderStorefront();
+    renderAuthorsDirectory();
     renderCatalog();
     renderBookDetail();
   }

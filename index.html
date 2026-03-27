@@ -31,30 +31,22 @@
     </header>
 
     <main class="storefront">
-      <section class="panel surface section-directory">
-        <div class="section-head">
-          <h2>სექციები</h2>
-          <span>აირჩიე სასურველი ნაწილი და პირდაპირ გადადი მასზე</span>
-        </div>
-
-        <div class="section-links">
-          <a class="section-link" href="#ebooksSection">ელექტრონული წიგნები</a>
-          <a class="section-link" href="#audioSection">აუდიო წიგნები</a>
-          <a class="section-link" href="#topBooksSection">თვის ტოპ წიგნები</a>
-          <a class="section-link" href="#authorsSection">ავტორების მიხედვით</a>
-          <a class="section-link" href="#newBooksSection">ახალი დამატებულები</a>
-          <a class="section-link" href="#searchSection">ძებნა</a>
-        </div>
-      </section>
-
       <section id="searchSection" class="panel surface search-panel">
         <div class="section-head">
           <h2>ძებნა</h2>
-          <span>იპოვე წიგნი სათაურით, ჟანრით ან ფორმატით</span>
+          <span>იპოვე წიგნი სათაურით, ფორმატით, ჟანრით ან სასურველი სექციით</span>
         </div>
 
         <form id="searchForm" class="toolbar-grid toolbar-grid--search">
           <input id="searchBooks" class="input" type="search" placeholder="მოძებნე წიგნი..." />
+          <select id="filterSection" class="input">
+            <option value="all">ყველა სექცია</option>
+            <option value="ebooksSection">ელექტრონული წიგნები</option>
+            <option value="audioSection">აუდიო წიგნები</option>
+            <option value="topBooksSection">თვის ტოპ წიგნები</option>
+            <option value="authorsSection">ავტორების მიხედვით</option>
+            <option value="newBooksSection">ახალი დამატებულები</option>
+          </select>
           <select id="filterFormat" class="input">
             <option value="all">ყველა ფორმატი</option>
             <option value="ebook">ელექტრონული წიგნები</option>
@@ -72,7 +64,7 @@
         </form>
       </section>
 
-      <section id="ebooksSection" class="panel surface">
+      <section id="ebooksSection" class="panel surface" data-target-url="library.html?format=ebook">
         <div class="section-head with-link">
           <div>
             <h2>ელექტრონული წიგნები</h2>
@@ -83,7 +75,7 @@
         <div id="ebookBooksGrid" class="book-grid"></div>
       </section>
 
-      <section id="audioSection" class="panel surface">
+      <section id="audioSection" class="panel surface" data-target-url="library.html?format=audio">
         <div class="section-head with-link">
           <div>
             <h2>აუდიო წიგნები</h2>
@@ -94,10 +86,13 @@
         <div id="audioBooksGrid" class="book-grid"></div>
       </section>
 
-      <section class="panel surface" id="topBooksSection">
-        <div class="section-head">
-          <h2>თვის ტოპ წიგნები</h2>
-          <span>ყველაზე მოთხოვნადი და რეკომენდებული გამოცემები</span>
+      <section class="panel surface" id="topBooksSection" data-target-url="library.html?top=1">
+        <div class="section-head with-link">
+          <div>
+            <h2>თვის ტოპ წიგნები</h2>
+            <span>ყველაზე მოთხოვნადი და რეკომენდებული გამოცემები</span>
+          </div>
+          <a class="mini-link" href="library.html?top=1">ყველას ნახვა</a>
         </div>
         <div id="topBooksGrid" class="book-grid"></div>
       </section>
@@ -108,15 +103,21 @@
             <h2>ავტორების მიხედვით</h2>
             <span>გადაათვალიერე ავტორები ერთ ხაზში და მოძებნე სასურველი სახელი</span>
           </div>
-          <input id="authorSearch" class="input author-search" type="search" placeholder="მოძებნე ავტორი..." />
+          <div class="author-tools">
+            <input id="authorSearch" class="input author-search" type="search" placeholder="მოძებნე ავტორი..." />
+            <a class="mini-link" href="authors.html">ყველა ავტორი</a>
+          </div>
         </div>
         <div id="authorsGrid" class="author-strip"></div>
       </section>
 
-      <section id="newBooksSection" class="panel surface">
-        <div class="section-head">
-          <h2>ახალი დამატებულები</h2>
-          <span>ახლად დამატებული წიგნები და აუდიოწიგნები ერთ სივრცეში</span>
+      <section id="newBooksSection" class="panel surface" data-target-url="library.html?sort=new">
+        <div class="section-head with-link">
+          <div>
+            <h2>ახალი დამატებულები</h2>
+            <span>ახლად დამატებული წიგნები და აუდიოწიგნები ერთ სივრცეში</span>
+          </div>
+          <a class="mini-link" href="library.html?sort=new">ყველას ნახვა</a>
         </div>
         <div id="newBooksGrid" class="book-grid"></div>
       </section>
@@ -125,6 +126,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/js/config.js"></script>
+  <script src="assets/js/common.js"></script>
   <script src="assets/js/supabase.js"></script>
   <script src="assets/js/api.js"></script>
   <script src="assets/js/app.js"></script>

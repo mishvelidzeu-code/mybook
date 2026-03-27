@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#edf5ff" />
+  <title>ყველა ავტორი — წიგნების თარო</title>
+  <link rel="icon" type="image/svg+xml" href="assets/icons/books-shelf-logo.svg" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar surface compact">
+      <a class="brand-wrap brand-link" href="index.html" aria-label="მთავარ გვერდზე დაბრუნება">
+        <div class="brand-mark">წთ</div>
+        <div>
+          <h1>ყველა ავტორი</h1>
+          <p>მოძებნე ავტორი და გადადი მის წიგნებზე</p>
+        </div>
+      </a>
+
+      <div class="top-actions">
+        <a class="ghost-btn" href="index.html">მთავარი</a>
+        <a class="ghost-btn" href="library.html">ბიბლიოთეკა</a>
+      </div>
+    </header>
+
+    <main class="content-stack">
+      <section class="panel surface">
+        <div class="section-head">
+          <h2>ავტორების კატალოგი</h2>
+          <span>ყველა ავტორი ერთ გვერდზე პატარა სურათებით და სწრაფი ძებნით</span>
+        </div>
+
+        <input id="authorDirectorySearch" class="input" type="search" placeholder="მოძებნე ავტორი..." />
+        <p id="authorsMeta" class="panel-note">ყველა ავტორი აქ გამოჩნდება.</p>
+      </section>
+
+      <section id="authorsDirectoryGrid" class="author-grid" aria-live="polite"></section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/common.js"></script>
+  <script src="assets/js/supabase.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
